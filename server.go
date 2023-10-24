@@ -83,15 +83,7 @@ func handleClient(client Client) {
 			break
 		}
 		msg := string(message)
-		if msg == "/who" {
-			userList := "Users connected :"
-			for c := range clients {
-				userList += "\n" + c.conn.RemoteAddr().String()
-			}
-			client.messages <- userList
-		} else {
-			messages <- msg
-		}
+		messages <- msg
 	}
 }
 
