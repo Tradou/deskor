@@ -55,7 +55,7 @@ func main() {
 			var receivedMessage Message
 			if err := json.Unmarshal([]byte(message), &receivedMessage); err == nil {
 				fmt.Printf("\033[1A\033[K")
-				fmt.Printf("%s: %s\n", receivedMessage.Sender, receivedMessage.Text)
+				fmt.Printf("%s: %s", receivedMessage.Sender, receivedMessage.Text)
 			} else {
 				// TODO: idk in which case it's possible, and how to handle it
 				fmt.Printf("\033[1A\033[K")

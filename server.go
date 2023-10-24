@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"strings"
 )
 
 type Client struct {
@@ -95,7 +94,6 @@ func handleClient(client Client) {
 			break
 		}
 		msg := string(message[:n])
-		msg = strings.TrimRight(msg, "\n")
 
 		var chatMsg ChatMessage
 		if err := json.Unmarshal([]byte(msg), &chatMsg); err == nil {
