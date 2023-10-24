@@ -89,11 +89,11 @@ func handleClient(client Client) {
 
 	for {
 		message := make([]byte, 512)
-		_, err := client.conn.Read(message)
+		n, err := client.conn.Read(message)
 		if err != nil {
 			break
 		}
-		msg := string(message)
+		msg := string(message[:n])
 		var chatMsg ChatMessage
 		if err := json.Unmarshal([]byte(msg), &chatMsg); err == nil {
 			messages <- chatMsg
