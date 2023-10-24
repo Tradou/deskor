@@ -59,13 +59,34 @@ func main() {
 		}
 
 		join <- client
-		go handleClient(client)
+	}
+}
+
+func handleMessages() {
+	for {
+		select {
+		case client := <-join:
+			fmt.Println("New client joined:", client.conn.RemoteAddr())
+			go handleClient(client)
+		case disconnect := <-leave:
+			fmt.Println("Client left:", disconnect.client.conn.RemoteAddr())
+		case message := <-messages:
+			fmt.Println("Message received:", message.Text)
+			for client := range clients {
+				go func(c Client, msg ChatMessage) {
+					select {
+					case c.messages <- msg:
+					default:
+						fmt.Println("Message not sent to clients:", c.conn.RemoteAddr())
+					}
+				}(client, message)
+			}
+		}
 	}
 }
 
 func handleClient(client Client) {
 	clients[client] = true
-
 	defer func() {
 		delete(clients, client)
 		leave <- Disconnect{client}
@@ -100,28 +121,6 @@ func handleClient(client Client) {
 			messages <- chatMsg
 		} else {
 			fmt.Println("Received invalid message:", msg)
-		}
-	}
-}
-
-func handleMessages() {
-	for {
-		select {
-		case client := <-join:
-			fmt.Println("New client joined:", client.conn.RemoteAddr())
-		case disconnect := <-leave:
-			fmt.Println("Client left:", disconnect.client.conn.RemoteAddr())
-		case message := <-messages:
-			fmt.Println("Message received:", message.Text)
-			for client := range clients {
-				go func(c Client, msg ChatMessage) {
-					select {
-					case c.messages <- msg:
-					default:
-						fmt.Println("Message not sent to clients:", c.conn.RemoteAddr())
-					}
-				}(client, message)
-			}
 		}
 	}
 }
