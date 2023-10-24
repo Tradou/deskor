@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
+	"log"
 	"net"
+	"os"
 )
 
 type Client struct {
@@ -20,7 +23,13 @@ var leave = make(chan Disconnect)
 var messages = make(chan string)
 
 func main() {
-	listener, err := net.Listen("tcp", "0.0.0.0:8080")
+	err := godotenv.Load(".env.server")
+	if err != nil {
+		log.Fatal("Error loading env var")
+	}
+	port := os.Getenv("PORT")
+
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))
 	if err != nil {
 		fmt.Println("Error starting the server:", err)
 		return
