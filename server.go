@@ -44,7 +44,7 @@ func main() {
 
 	fmt.Println("Chat server started on port 8080")
 
-	go handleMessages()
+	go broadcast()
 
 	for {
 		conn, err := listener.Accept()
@@ -62,7 +62,7 @@ func main() {
 	}
 }
 
-func handleMessages() {
+func broadcast() {
 	for {
 		select {
 		case client := <-join:
