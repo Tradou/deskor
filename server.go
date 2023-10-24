@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"log"
@@ -10,17 +11,22 @@ import (
 
 type Client struct {
 	conn     net.Conn
-	messages chan string
+	messages chan ChatMessage
 }
 
 type Disconnect struct {
 	client Client
 }
 
+type ChatMessage struct {
+	Sender string `json:"sender"`
+	Text   string `json:"text"`
+}
+
 var clients = make(map[Client]bool)
 var join = make(chan Client)
 var leave = make(chan Disconnect)
-var messages = make(chan string)
+var messages = make(chan ChatMessage)
 
 func main() {
 	err := godotenv.Load(".env.server")
@@ -49,7 +55,7 @@ func main() {
 
 		client := Client{
 			conn:     conn,
-			messages: make(chan string),
+			messages: make(chan ChatMessage),
 		}
 
 		join <- client
@@ -68,7 +74,12 @@ func handleClient(client Client) {
 
 	go func() {
 		for msg := range client.messages {
-			_, err := client.conn.Write([]byte(msg))
+			messageJSON, err := json.Marshal(msg)
+			if err != nil {
+				fmt.Println("Error sending message to client:", err)
+				return
+			}
+			_, err = client.conn.Write(messageJSON)
 			if err != nil {
 				fmt.Println("Error sending message to client:", err)
 				return
@@ -83,7 +94,12 @@ func handleClient(client Client) {
 			break
 		}
 		msg := string(message)
-		messages <- msg
+		var chatMsg ChatMessage
+		if err := json.Unmarshal([]byte(msg), &chatMsg); err == nil {
+			messages <- chatMsg
+		} else {
+			fmt.Println("Received invalid message:", msg)
+		}
 	}
 }
 
@@ -95,9 +111,9 @@ func handleMessages() {
 		case disconnect := <-leave:
 			fmt.Println("Client left:", disconnect.client.conn.RemoteAddr())
 		case message := <-messages:
-			fmt.Println("Message received:", message)
+			fmt.Println("Message received:", message.Text)
 			for client := range clients {
-				go func(c Client, msg string) {
+				go func(c Client, msg ChatMessage) {
 					select {
 					case c.messages <- msg:
 					default:

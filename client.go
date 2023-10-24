@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"log"
@@ -10,6 +11,11 @@ import (
 	"os/signal"
 	"strings"
 )
+
+type Message struct {
+	Sender string `json:"sender"`
+	Text   string `json:"text"`
+}
 
 func main() {
 	err := godotenv.Load(".env.client")
@@ -46,16 +52,34 @@ func main() {
 			}
 			message := string(buffer[:n])
 
-			fmt.Printf("\033[1A\033[K")
-			fmt.Print(message)
+			var receivedMessage Message
+			if err := json.Unmarshal([]byte(message), &receivedMessage); err == nil {
+				fmt.Printf("\033[1A\033[K")
+				fmt.Printf("%s: %s\n", receivedMessage.Sender, receivedMessage.Text)
+			} else {
+				// TODO: idk in which case it's possible, and how to handle it
+				fmt.Printf("\033[1A\033[K")
+				fmt.Print(message)
+			}
 		}
 	}()
 
 	go func() {
 		for {
 			text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-			message := username + ": " + text
-			_, err := conn.Write([]byte(message))
+
+			message := Message{
+				Sender: username,
+				Text:   text,
+			}
+
+			messageJSON, err := json.Marshal(message)
+			if err != nil {
+				fmt.Println("Error while sending message")
+				close(exit)
+				break
+			}
+			_, err = conn.Write(append(messageJSON, '\n'))
 			if err != nil {
 				fmt.Println("Error while sending message")
 				close(exit)
