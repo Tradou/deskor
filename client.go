@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	"deskor/chat"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -13,11 +13,6 @@ import (
 	"os"
 	"os/signal"
 )
-
-type Message struct {
-	Sender string `json:"sender"`
-	Text   string `json:"text"`
-}
 
 func main() {
 	err := godotenv.Load(".env.client")
@@ -49,17 +44,15 @@ func main() {
 	messageWidget.SetPlaceHolder("Type your message and press Enter")
 
 	messageWidget.OnSubmitted = func(text string) {
-		message := Message{
-			Sender: usernameWidget.Text,
-			Text:   text,
-		}
+		sender := usernameWidget.Text
+		chater := &chat.Client{}
 
-		messageJSON, err := json.Marshal(message)
+		message, err := chater.EncodeMessage(sender, text)
 		if err != nil {
-			fmt.Println("Error while sending message")
+			fmt.Println("Error while encoding message")
 			close(exit)
 		} else {
-			_, err = conn.Write(append(messageJSON, '\n'))
+			err = chater.SendMessage(conn, message)
 			if err != nil {
 				fmt.Println("Error while sending message")
 				close(exit)
@@ -70,22 +63,24 @@ func main() {
 
 	go func() {
 		for {
-			buffer := make([]byte, 1024)
-			n, err := conn.Read(buffer)
+			chater := &chat.Client{}
+
+			message, err := chater.ReceiveMessage(conn)
 			if err != nil {
-				fmt.Println("Error while reading messages:")
+				fmt.Println("Error while reading messages:", err)
 				close(exit)
 				break
 			}
-			message := string(buffer[:n])
 
-			var receivedMessage Message
-			if err := json.Unmarshal([]byte(message), &receivedMessage); err == nil {
-				chatWidget.SetText(chatWidget.Text + "\n" + receivedMessage.Sender + ": " + receivedMessage.Text)
+			var receivedMessage chat.Message
+
+			if decodedMessage, err := chater.DecodeMessage(message); err == nil {
+				receivedMessage = decodedMessage
 			} else {
-				// TODO: idk in which case it's possible, and how to handle it
-				chatWidget.SetText(chatWidget.Text + "\n" + receivedMessage.Sender + ": " + receivedMessage.Text)
+				fmt.Println("Error while decoding message:", err)
 			}
+
+			chatWidget.SetText(chatWidget.Text + "\n" + receivedMessage.Sender + ": " + receivedMessage.Text)
 			chatScroller.ScrollToBottom()
 		}
 	}()

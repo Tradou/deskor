@@ -1,6 +1,7 @@
 package main
 
 import (
+	"deskor/chat"
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -9,24 +10,10 @@ import (
 	"os"
 )
 
-type Client struct {
-	conn     net.Conn
-	messages chan ChatMessage
-}
-
-type Disconnect struct {
-	client Client
-}
-
-type ChatMessage struct {
-	Sender string `json:"sender"`
-	Text   string `json:"text"`
-}
-
-var clients = make(map[Client]bool)
-var join = make(chan Client)
-var leave = make(chan Disconnect)
-var messages = make(chan ChatMessage)
+var clients = make(map[chat.Client]bool)
+var join = make(chan chat.Client)
+var leave = make(chan chat.Disconnect)
+var messages = make(chan chat.Message)
 
 func main() {
 	err := godotenv.Load(".env.server")
@@ -53,9 +40,9 @@ func main() {
 			continue
 		}
 
-		client := Client{
-			conn:     conn,
-			messages: make(chan ChatMessage),
+		client := chat.Client{
+			Conn:     conn,
+			Messages: make(chan chat.Message),
 		}
 
 		join <- client
@@ -66,18 +53,18 @@ func broadcast() {
 	for {
 		select {
 		case client := <-join:
-			fmt.Println("New client joined:", client.conn.RemoteAddr())
+			fmt.Println("New client joined:", client.Conn.RemoteAddr())
 			go handleClient(client)
 		case disconnect := <-leave:
-			fmt.Println("Client left:", disconnect.client.conn.RemoteAddr())
+			fmt.Println("Client left:", disconnect.Client.Conn.RemoteAddr())
 		case message := <-messages:
 			fmt.Println("Message received:", message.Text)
 			for client := range clients {
-				go func(c Client, msg ChatMessage) {
+				go func(c chat.Client, msg chat.Message) {
 					select {
-					case c.messages <- msg:
+					case c.Messages <- msg:
 					default:
-						fmt.Println("Message not sent to clients:", c.conn.RemoteAddr())
+						fmt.Println("Message not sent to clients:", c.Conn.RemoteAddr())
 					}
 				}(client, message)
 			}
@@ -85,22 +72,22 @@ func broadcast() {
 	}
 }
 
-func handleClient(client Client) {
+func handleClient(client chat.Client) {
 	clients[client] = true
 	defer func() {
 		delete(clients, client)
-		leave <- Disconnect{client}
-		client.conn.Close()
+		leave <- chat.Disconnect{client}
+		client.Conn.Close()
 	}()
 
 	go func() {
-		for msg := range client.messages {
+		for msg := range client.Messages {
 			messageJSON, err := json.Marshal(msg)
 			if err != nil {
 				fmt.Println("Error sending message to client:", err)
 				return
 			}
-			_, err = client.conn.Write(messageJSON)
+			_, err = client.Conn.Write(messageJSON)
 			if err != nil {
 				fmt.Println("Error sending message to client:", err)
 				return
@@ -110,13 +97,13 @@ func handleClient(client Client) {
 
 	for {
 		message := make([]byte, 512)
-		n, err := client.conn.Read(message)
+		n, err := client.Conn.Read(message)
 		if err != nil {
 			break
 		}
 		msg := string(message[:n])
 
-		var chatMsg ChatMessage
+		var chatMsg chat.Message
 		if err := json.Unmarshal([]byte(msg), &chatMsg); err == nil {
 			messages <- chatMsg
 		} else {
