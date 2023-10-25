@@ -4,6 +4,8 @@ go 1.21.3
 
 require github.com/joho/godotenv v1.5.1
 
+require github.com/gopxl/beep v1.1.0 // indirect
+
 require (
 	fyne.io/fyne/v2 v2.4.1
 	fyne.io/systray v1.10.1-0.20230722100817-88df1e0ffa9a // indirect
