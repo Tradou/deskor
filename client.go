@@ -29,7 +29,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	clientIp := conn.LocalAddr()
+	clientIp := conn.LocalAddr().String()
 	defer conn.Close()
 
 	exit := make(chan os.Signal, 1)

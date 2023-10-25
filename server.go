@@ -84,7 +84,7 @@ func handleClient(client chat.Client) {
 		for message := range client.Messages {
 			msg := chat.Message{
 				Sender:   message.Sender,
-				SenderIp: client.Conn.RemoteAddr(),
+				SenderIp: client.Conn.RemoteAddr().String(),
 				Text:     message.Text,
 			}
 

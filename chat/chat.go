@@ -8,9 +8,9 @@ import (
 )
 
 type Message struct {
-	Sender   string   `json:"sender"`
-	SenderIp net.Addr `json:"senderIp"`
-	Text     string   `json:"text"`
+	Sender   string `json:"sender"`
+	SenderIp string `json:"senderIp"`
+	Text     string `json:"text"`
 	IChat
 }
 
