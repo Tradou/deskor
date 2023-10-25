@@ -2,6 +2,7 @@ package main
 
 import (
 	"deskor/chat"
+	"deskor/notification"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -39,6 +40,19 @@ func main() {
 	chatWidget := widget.NewLabel("Chat will appear here")
 
 	chatScroller := container.NewVScroll(chatWidget)
+	var notificationWidget *widget.Button
+	notificationWidget = widget.NewButtonWithIcon("", notification.GetIcon(), func() {
+		notification.Toggle()
+		notificationWidget.SetIcon(notification.GetIcon())
+	})
+
+	topContainer := container.NewBorder(
+		nil,
+		nil,
+		usernameWidget,
+		notificationWidget,
+		nil,
+	)
 
 	usernameWidget.SetPlaceHolder("Enter your username")
 	messageWidget.SetPlaceHolder("Type your message and press Enter")
@@ -82,11 +96,14 @@ func main() {
 
 			chatWidget.SetText(chatWidget.Text + "\n" + receivedMessage.Sender + ": " + receivedMessage.Text)
 			chatScroller.ScrollToBottom()
+			if notification.IsEnabled() {
+				notification.Sound()
+			}
 		}
 	}()
 
 	content := container.NewBorder(
-		usernameWidget,
+		topContainer,
 		messageWidget,
 		nil,
 		nil,
