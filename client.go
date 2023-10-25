@@ -28,6 +28,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	clientIp := conn.LocalAddr()
 	defer conn.Close()
 
 	exit := make(chan os.Signal, 1)
@@ -96,7 +98,7 @@ func main() {
 
 			chatWidget.SetText(chatWidget.Text + "\n" + receivedMessage.Sender + ": " + receivedMessage.Text)
 			chatScroller.ScrollToBottom()
-			if notification.IsEnabled() {
+			if notification.IsEnabled() && clientIp != receivedMessage.SenderIp {
 				notification.Sound()
 			}
 		}

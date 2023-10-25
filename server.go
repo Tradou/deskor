@@ -81,7 +81,13 @@ func handleClient(client chat.Client) {
 	}()
 
 	go func() {
-		for msg := range client.Messages {
+		for message := range client.Messages {
+			msg := chat.Message{
+				Sender:   message.Sender,
+				SenderIp: client.Conn.RemoteAddr(),
+				Text:     message.Text,
+			}
+
 			messageJSON, err := json.Marshal(msg)
 			if err != nil {
 				fmt.Println("Error sending message to client:", err)
