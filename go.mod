@@ -1,8 +1,16 @@
 module deskor
 
-go 1.21.3
+go 1.21
 
 require github.com/joho/godotenv v1.5.1
+
+require (
+	github.com/gopxl/beep v1.1.0
+	github.com/hajimehoshi/go-mp3 v0.3.0 // indirect
+	github.com/hajimehoshi/oto v0.7.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
+)
 
 require (
 	fyne.io/fyne/v2 v2.4.1
