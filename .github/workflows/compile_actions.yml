@@ -14,11 +14,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Configure Git identity
-        run: |
-          git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
-          git config --global user.name ${{ secrets.GIT_USER }}
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -29,6 +24,8 @@ jobs:
 
       - name: Compile for Windows
         run: |
+          git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
+          git config --global user.name ${{ secrets.GIT_USER }}
           if ! git ls-remote --exit-code origin refs/heads/windows; then
             git checkout -b windows
           else
@@ -42,6 +39,8 @@ jobs:
 
       - name: Compile for Linux
         run: |
+          git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
+          git config --global user.name ${{ secrets.GIT_USER }}
           if ! git ls-remote --exit-code origin refs/heads/linux; then
             git checkout -b linux
           else
@@ -68,6 +67,8 @@ jobs:
 
       - name: Compile server
         run: |
+          git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
+          git config --global user.name ${{ secrets.GIT_USER }}
           if ! git ls-remote --exit-code origin refs/heads/server; then
             git checkout -b server
           else
