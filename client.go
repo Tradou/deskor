@@ -38,6 +38,7 @@ func main() {
 	myApp := app.New()
 	window := myApp.NewWindow("Deskor")
 	usernameWidget := widget.NewEntry()
+	allowEditUsername := false
 	messageWidget := widget.NewEntry()
 	chatWidget := widget.NewLabel("Chat will appear here")
 
@@ -69,6 +70,10 @@ func main() {
 			if err != nil {
 				fmt.Println("Error while sending message")
 				close(exit)
+			}
+			if allowEditUsername {
+				usernameWidget.Disable()
+				allowEditUsername = false
 			}
 		}
 		messageWidget.SetText("")
