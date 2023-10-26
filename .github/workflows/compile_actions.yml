@@ -75,5 +75,5 @@ jobs:
           fi
           go build -o bin/server server.go
           git add bin/server
-          git commit -m "build(compile): compile for Windows"
-          git push origin windows
+          git commit -m "build(compile): compile for server"
+          git push origin server
