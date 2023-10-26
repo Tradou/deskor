@@ -2,6 +2,7 @@ package main
 
 import (
 	"deskor/chat"
+	"deskor/graphic"
 	"deskor/notification"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -47,12 +48,9 @@ func main() {
 		notificationWidget.SetIcon(notification.GetIcon())
 	})
 
-	topContainer := container.NewBorder(
-		nil,
-		nil,
+	topContainer := graphic.NewAdaptiveGridWithRatios([]float32{0.95, 0.05},
 		usernameWidget,
 		notificationWidget,
-		nil,
 	)
 
 	usernameWidget.SetPlaceHolder("Enter your username")
