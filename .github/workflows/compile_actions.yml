@@ -11,18 +11,11 @@ on:
 jobs:
   compile-clients:
     name: Compile clients
-    runs-on: ubuntu-latest
+    runs-on: docker://fyneio/fyne-cross-images:linux
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version-file: 'go.mod'
-        run: |
-          go install github.com/fyne-io/fyne-cross@latest
 
       - name: Build Docker Image
         run: docker build -t fyne-custom -f build/Dockerfile .
