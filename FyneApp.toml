@@ -1,0 +1,8 @@
+Website = "https://github.com/Tradou/deskor"
+
+[Details]
+Icon = "Icon.png"
+Name = "Deskor"
+ID = "https://github.com/Tradou/deskor"
+Version = "1.0.0"
+Build = 1
