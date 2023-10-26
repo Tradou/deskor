@@ -32,7 +32,7 @@ jobs:
           fi
           go install github.com/fyne-io/fyne-cross@latest
           fyne-cross windows -image fyne-custom
-          git add fyne-cross/dist/windows-amd64/
+          git add fyne-cross/dist/windows-amd64/*
           git commit -m "build(compile): compile for Windows"
           git push origin windows
 
@@ -47,7 +47,7 @@ jobs:
           fi
           go install github.com/fyne-io/fyne-cross@latest
           fyne-cross linux -image fyne-custom
-          git add fyne-cross/dist/linux-amd64/
+          git add fyne-cross/dist/linux-amd64/*
           git commit -m "build(compile): compile for Linux"
           git push origin linux
 
@@ -74,5 +74,6 @@ jobs:
             git checkout server
           fi
           go build -o bin/server server.go
+          git add bin/server
           git commit -m "build(compile): compile for Windows"
           git push origin windows
