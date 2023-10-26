@@ -19,7 +19,6 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          go install github.com/fyne-io/fyne-cross@latest
           docker build -t fyne-custom -f build/Dockerfile .
 
       - name: Compile for Windows
@@ -31,7 +30,7 @@ jobs:
           else
             git checkout windows
           fi
-          rm server.go
+          go install github.com/fyne-io/fyne-cross@latest
           fyne-cross windows -image fyne-custom
           git add fyne-cross/dist/windows-amd64/
           git commit -m "build(compile): compile for Windows"
@@ -46,7 +45,7 @@ jobs:
           else
             git checkout linux
           fi
-          rm server.go
+          go install github.com/fyne-io/fyne-cross@latest
           fyne-cross linux -image fyne-custom
           git add fyne-cross/dist/linux-amd64/
           git commit -m "build(compile): compile for Linux"
