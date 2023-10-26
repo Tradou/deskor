@@ -11,14 +11,21 @@ on:
 jobs:
   compile-clients:
     name: Compile clients
-    runs-on: docker://fyneio/fyne-cross-images:linux
+    runs-on: ubuntu-latest
 
     steps:
+      - name: Configure Git identity
+        run: |
+          git config --global user.email ${{ secrets.GIT_USER }}
+          git config --global user.name ${{ secrets.GIT_USER }}
+
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Build Docker Image
-        run: docker build -t fyne-custom -f build/Dockerfile .
+        run: |
+          go install github.com/fyne-io/fyne-cross@latest
+          docker build -t fyne-custom -f build/Dockerfile .
 
       - name: Compile for Windows
         run: |
