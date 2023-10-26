@@ -1,0 +1,89 @@
+name: Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  compile-clients:
+    name: Compile clients
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: latest
+
+      - name: Build Docker Image
+          run: docker build -t fyne-custom -f build/Dockerfile .
+
+      - name: Compile for Windows
+        run: |
+          if ! git ls-remote --exit-code origin refs/heads/windows; then
+            git checkout -b windows
+          else
+            git checkout windows
+          fi
+          rm server.go
+          fyne-cross windows -image fyne-custom
+          git add fyne-cross/dist/windows-amd64/
+          git commit -m "build(compile): compile for Windows"
+          git push origin windows
+
+      #      - name: Compile for macOS
+      #        run: |
+      #          if ! git ls-remote --exit-code origin refs/heads/macos; then
+      #          git checkout -b macos
+      #          else
+      #          git checkout macos
+      #          fi
+      #          rm server.go
+      #          fyne-cross darwin -image fyne-custom
+      #          git add fyne-cross/dist/
+      #          git commit -m "build(compile): compile for macOS"
+      #          git push origin macos
+
+      - name: Compile for Linux
+        run: |
+          if ! git ls-remote --exit-code origin refs/heads/linux; then
+            git checkout -b linux
+          else
+            git checkout linux
+          fi
+          rm server.go
+          fyne-cross linux -image fyne-custom
+          git add fyne-cross/dist/linux-amd64/
+          git commit -m "build(compile): compile for Linux"
+          git push origin linux
+
+  compile-server:
+    name: Compile server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: latest
+
+      - name: Compile server
+        run: |
+          if ! git ls-remote --exit-code origin refs/heads/server; then
+            git checkout -b server
+          else
+            git checkout server
+          fi
+          go build -o bin/server server.go
+          git commit -m "build(compile): compile for Windows"
+          git push origin windows
