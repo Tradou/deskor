@@ -1,11 +1,13 @@
 package notification
 
 import (
+	"bytes"
+	"deskor/assets/bundle"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 	"github.com/gopxl/beep/mp3"
 	"github.com/gopxl/beep/speaker"
-	"os"
+	"io"
 	"time"
 )
 
@@ -20,11 +22,13 @@ func IsEnabled() bool {
 }
 
 func Sound() {
-	file, err := os.Open("assets/sound/notification.mp3")
-	if err != nil {
-		panic(err)
-	}
-	streamer, format, err := mp3.Decode(file)
+	soundBytes := bundle.ResourceAssetsSoundNotificationMp3.StaticContent
+
+	soundReader := bytes.NewReader(soundBytes)
+
+	readCloser := io.NopCloser(soundReader)
+
+	streamer, format, err := mp3.Decode(readCloser)
 	if err != nil {
 		panic(err)
 	}
