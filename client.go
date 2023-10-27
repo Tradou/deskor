@@ -93,7 +93,7 @@ func main() {
 
 			message, err := chater.ReceiveMessage(conn)
 			if err != nil {
-				l.Write("Error while reading message")
+				l.Write("Error while receive message")
 				close(exit)
 				break
 			}
