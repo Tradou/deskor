@@ -9,54 +9,6 @@ on:
       - main
 
 jobs:
-  compile-clients:
-    name: Compile clients
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version-file: 'go.mod'
-
-      - name: Build Docker Image
-        run: |
-          docker build -t fyne-custom -f build/Dockerfile .
-
-      - name: Compile for Windows
-        run: |
-          git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
-          git config --global user.name ${{ secrets.GIT_USER }}
-          if ! git ls-remote --exit-code origin refs/heads/windows; then
-            git checkout -b windows
-          else
-            git checkout windows
-          fi
-          go install github.com/fyne-io/fyne-cross@latest
-          go mod tidy
-          fyne-cross windows -image fyne-custom
-          git add fyne-cross/dist/windows-amd64/*
-          git commit -m "build(compile): compile for Windows"
-          git push origin windows
-
-      - name: Compile for Linux
-        run: |
-          git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
-          git config --global user.name ${{ secrets.GIT_USER }}
-          if ! git ls-remote --exit-code origin refs/heads/linux; then
-            git checkout -b linux
-          else
-            git checkout linux
-          fi
-          go install github.com/fyne-io/fyne-cross@latest
-          fyne-cross linux -image fyne-custom
-          git add fyne-cross/dist/linux-amd64/*
-          git commit -m "build(compile): compile for Linux"
-          git push origin linux
-
   compile-server:
     name: Compile server
     runs-on: ubuntu-latest
@@ -85,3 +37,54 @@ jobs:
             git commit -m "build(compile): compile for server"
             git push origin server
           fi
+
+  compile-clients:
+    name: Compile clients
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Build Docker Image
+        run: |
+          docker build -t fyne-custom -f build/Dockerfile .
+
+      - name: Compile for Windows
+        run: |
+          git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
+          git config --global user.name ${{ secrets.GIT_USER }}
+          if ! git ls-remote --exit-code origin refs/heads/windows; then
+            git checkout -b windows
+          else
+            git checkout windows
+          fi
+          go install github.com/fyne-io/fyne-cross@latest
+          go mod tidy
+          rm server.go
+          fyne-cross windows -image fyne-custom
+          git add fyne-cross/dist/windows-amd64/*
+          git commit -m "build(compile): compile for Windows"
+          git push origin windows
+
+      - name: Compile for Linux
+        run: |
+          git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
+          git config --global user.name ${{ secrets.GIT_USER }}
+          if ! git ls-remote --exit-code origin refs/heads/linux; then
+            git checkout -b linux
+          else
+            git checkout linux
+          fi
+          go install github.com/fyne-io/fyne-cross@latest
+          go mod tidy
+          rm server.go
+          fyne-cross linux -image fyne-custom
+          git add fyne-cross/dist/linux-amd64/*
+          git commit -m "build(compile): compile for Linux"
+          git push origin linux
