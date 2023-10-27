@@ -29,9 +29,11 @@ jobs:
           git fetch --all
           git checkout server
           go build -o bin/server server.go
-          git add bin/server
-          git commit -m "build(compile): compile for server"
-          git push origin server
+          if git diff --quiet -- bin/server; then
+            git add bin/server
+            git commit -m "build(compile): compile for server"
+            git push origin server
+          fi
 
   compile-clients:
     name: Compile clients
@@ -60,9 +62,11 @@ jobs:
           go mod tidy
           rm server.go 2>/dev/null
           fyne-cross windows -image fyne-custom
-          git add fyne-cross/dist/windows-amd64/*
-          git commit -m "build(compile): compile for Windows"
-          git push origin windows
+          if git diff --quiet -- /dist/windows-amd64/; then
+            git add fyne-cross/dist/windows-amd64/*
+            git commit -m "build(compile): compile for Windows"
+            git push origin windows
+          fi
 
       - name: Compile for Linux
         run: |
@@ -74,6 +78,8 @@ jobs:
           go mod tidy
           rm server.go 2>/dev/null
           fyne-cross linux -image fyne-custom
-          git add fyne-cross/dist/linux-amd64/*
-          git commit -m "build(compile): compile for Linux"
-          git push origin linux
+          if git diff --quiet -- /dist/linux-amd64/; then
+            git add fyne-cross/dist/linux-amd64/*
+            git commit -m "build(compile): compile for Linux"
+            git push origin linux
+          fi
