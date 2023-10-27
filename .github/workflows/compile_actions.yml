@@ -28,12 +28,12 @@ jobs:
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git fetch --all
-          git checkout main
+          git checkout $GITHUB_REF_NAME
           git checkout -f -b server-wip
           go build -o bin/server server.go
           if ! git diff --quiet -- bin/server; then
             git ls-files | xargs git rm --cached
-            mv /bin/server server
+            mv bin/server server
             mv .env.server.sample .env.server
             mv build/server/README.md README.md
             git add server .env.server README.md
@@ -65,7 +65,7 @@ jobs:
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git fetch --all
-          git checkout main
+          git checkout $GITHUB_REF_NAME
           git checkout -b windows-wip
           go install github.com/fyne-io/fyne-cross@latest
           go mod tidy
@@ -88,7 +88,7 @@ jobs:
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git fetch --all
-          git checkout main
+          git checkout $GITHUB_REF_NAME
           git checkout -b linux-wip
           go install github.com/fyne-io/fyne-cross@latest
           go mod tidy
