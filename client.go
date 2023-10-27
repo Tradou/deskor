@@ -3,6 +3,7 @@ package main
 import (
 	"deskor/chat"
 	"deskor/graphic"
+	"deskor/log"
 	"deskor/notification"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -17,9 +18,16 @@ import (
 )
 
 func main() {
+	l, lErr := logger.NewFileLogger()
+	if lErr != nil {
+		log.Fatalf("Erreur while instantiating logger : %v", lErr)
+	}
+	defer l.Close()
+	l.Write("Start app")
+
 	err := godotenv.Load(".env.client")
 	if err != nil {
-		log.Fatal("Error loading env var")
+		l.Write("Error loading env var")
 	}
 
 	ip := os.Getenv("IP")
@@ -27,7 +35,7 @@ func main() {
 	serverAddr := fmt.Sprintf("%s:%s", ip, port)
 	conn, err := net.Dial("tcp", serverAddr)
 	if err != nil {
-		log.Fatal(err)
+		l.Write(fmt.Sprintf("Error connect to server: %v", err))
 	}
 
 	defer conn.Close()
@@ -68,7 +76,7 @@ func main() {
 		} else {
 			err = chater.SendMessage(conn, message)
 			if err != nil {
-				fmt.Println("Error while sending message")
+				l.Write("Error while sending message")
 				close(exit)
 			}
 			if allowEditUsername {
@@ -85,7 +93,7 @@ func main() {
 
 			message, err := chater.ReceiveMessage(conn)
 			if err != nil {
-				fmt.Println("Error while reading messages:", err)
+				l.Write("Error while reading message")
 				close(exit)
 				break
 			}
@@ -95,7 +103,7 @@ func main() {
 			if decodedMessage, err := chater.DecodeMessage(message); err == nil {
 				receivedMessage = decodedMessage
 			} else {
-				fmt.Println("Error while decoding message:", err)
+				l.Write("Error while reading message")
 			}
 
 			chatWidget.SetText(chatWidget.Text + "\n" + receivedMessage.Sender + ": " + receivedMessage.Text)
