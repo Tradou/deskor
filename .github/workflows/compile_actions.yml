@@ -26,17 +26,12 @@ jobs:
         run: |
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
-          if ! git ls-remote --exit-code origin refs/heads/server; then
-            git checkout -b server
-          else
-            git checkout server
-          fi
+          git fetch --all
+          git checkout server
           go build -o bin/server server.go
-          if ! git diff --quiet server -- bin/server; then
-            git add bin/server
-            git commit -m "build(compile): compile for server"
-            git push origin server
-          fi
+          git add bin/server
+          git commit -m "build(compile): compile for server"
+          git push origin server
 
   compile-clients:
     name: Compile clients
@@ -59,6 +54,7 @@ jobs:
         run: |
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
+          git fetch --all
           git checkout windows
           go install github.com/fyne-io/fyne-cross@latest
           go mod tidy
@@ -72,6 +68,7 @@ jobs:
         run: |
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
+          git fetch --all
           git checkout linux
           go install github.com/fyne-io/fyne-cross@latest
           go mod tidy
