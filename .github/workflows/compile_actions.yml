@@ -68,7 +68,7 @@ jobs:
             git add Deskor.exe.zip
             git commit -m "build(compile): compile for Windows"
             git push origin -d windows
-            git push origin windows
+            git push origin windows-wip:windows
           fi
 
       - name: Compile for Linux
@@ -87,5 +87,5 @@ jobs:
             git add Deskor.tar.xz
             git commit -m "build(compile): compile for Linux"
             git push origin -d linux
-            git push origin linux
+            git push origin linux-wip:linux
           fi
