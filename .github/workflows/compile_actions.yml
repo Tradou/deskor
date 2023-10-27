@@ -58,6 +58,7 @@ jobs:
           git config --global user.name ${{ secrets.GIT_USER }}
           git fetch --all
           git checkout -f windows
+          git merge -X theirs origin/main
           go install github.com/fyne-io/fyne-cross@latest
           go mod tidy
           rm server.go 2>/dev/null
@@ -76,6 +77,7 @@ jobs:
           git config --global user.name ${{ secrets.GIT_USER }}
           git fetch --all
           git checkout -f linux
+          git merge -X theirs origin/main
           go install github.com/fyne-io/fyne-cross@latest
           go mod tidy
           rm server.go 2>/dev/null
