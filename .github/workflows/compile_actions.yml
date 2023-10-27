@@ -22,14 +22,8 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      - name: Set environment variables
-        run: |
-          GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
-          echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
-
       - name: Compile server
         run: |
-          git checkout -f $GIT_BRANCH
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git checkout -f -b server-wip
@@ -45,8 +39,8 @@ jobs:
             git push origin server-wip:server
           fi
 
-  compile-clients:
-    name: Compile clients
+  compile-windows:
+    name: Compile windows
     runs-on: ubuntu-latest
 
     steps:
@@ -58,18 +52,12 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      - name: Set environment variables
-        run: |
-          GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
-          echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
-
       - name: Build Docker Image
         run: |
           docker build -t fyne-custom -f build/Dockerfile .
 
       - name: Compile for Windows
         run: |
-          git checkout -f $GIT_BRANCH
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git checkout -b windows-wip
@@ -88,9 +76,25 @@ jobs:
             git push origin windows-wip:windows
           fi
 
+  compile-linux:
+    name: Compile clients
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Build Docker Image
+        run: |
+          docker build -t fyne-custom -f build/Dockerfile .
+
       - name: Compile for Linux
         run: |
-          git checkout -f $GIT_BRANCH
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git checkout -b linux-wip
