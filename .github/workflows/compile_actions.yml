@@ -75,6 +75,8 @@ jobs:
             git checkout server
           fi
           go build -o bin/server server.go
-          git add bin/server
-          git commit -m "build(compile): compile for server"
-          git push origin server
+          if ! git diff --quiet server -- bin/server; then
+            git add bin/server
+            git commit -m "build(compile): compile for server"
+            git push origin server
+          fi
