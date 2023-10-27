@@ -67,9 +67,8 @@ jobs:
             mv fyne-cross/dist/windows-amd64/Deskor.exe.zip Deskor.exe.zip
             git add Deskor.exe.zip
             git commit -m "build(compile): compile for Windows"
-            git push origin windows-wip
             git push origin -d windows
-            git push origin :windows-wip windows
+            git push origin windows
           fi
 
       - name: Compile for Linux
@@ -87,7 +86,6 @@ jobs:
             mv fyne-cross/dist/linux-amd64/Deskor.tar.xz Deskor.tar.xz
             git add Deskor.tar.xz
             git commit -m "build(compile): compile for Linux"
-            git push origin linux-wip
             git push origin -d linux
-            git push origin :linux-wip linux
+            git push origin linux
           fi
