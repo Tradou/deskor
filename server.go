@@ -2,6 +2,7 @@ package main
 
 import (
 	"deskor/chat"
+	logger "deskor/log"
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -14,29 +15,36 @@ var clients = make(map[chat.Client]bool)
 var join = make(chan chat.Client)
 var leave = make(chan chat.Disconnect)
 var messages = make(chan chat.Message)
+var l *logger.FileLogger
 
 func main() {
+	l, lErr := logger.NewFileLogger()
+	if lErr != nil {
+		log.Fatalf("Erreur while instantiating logger : %v", lErr)
+	}
+	defer l.Close()
+	l.Write("Start server")
+
 	err := godotenv.Load(".env.server")
 	if err != nil {
-		log.Fatal("Error loading env var")
+		l.Write("Error loading env var")
 	}
 	port := os.Getenv("PORT")
 
 	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))
 	if err != nil {
-		fmt.Println("Error starting the server:", err)
+		l.Write(fmt.Sprintf("Error starting the server: %s", err))
 		return
 	}
 	defer listener.Close()
-
-	fmt.Println("Chat server started on port 8080")
 
 	go broadcast()
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Error accepting connection:", err)
+			l.Write(fmt.Sprintf("Error accepting connection: %s", err))
+
 			continue
 		}
 
@@ -53,18 +61,17 @@ func broadcast() {
 	for {
 		select {
 		case client := <-join:
-			fmt.Println("New client joined:", client.Conn.RemoteAddr())
+			l.Write(fmt.Sprintf("Error accepting connection: %s", client.Conn.RemoteAddr()))
 			go handleClient(client)
 		case disconnect := <-leave:
-			fmt.Println("Client left:", disconnect.Client.Conn.RemoteAddr())
+			l.Write(fmt.Sprintf("Client left: %s", disconnect.Client.Conn.RemoteAddr()))
 		case message := <-messages:
-			fmt.Println("Message received:", message.Text)
 			for client := range clients {
 				go func(c chat.Client, msg chat.Message) {
 					select {
 					case c.Messages <- msg:
 					default:
-						fmt.Println("Message not sent to clients:", c.Conn.RemoteAddr())
+						l.Write("Message not sent to clients")
 					}
 				}(client, message)
 			}
@@ -90,12 +97,12 @@ func handleClient(client chat.Client) {
 
 			messageJSON, err := json.Marshal(msg)
 			if err != nil {
-				fmt.Println("Error sending message to client:", err)
+				l.Write(fmt.Sprintf("Error sending message to client: %s", err))
 				return
 			}
 			_, err = client.Conn.Write(messageJSON)
 			if err != nil {
-				fmt.Println("Error sending message to client:", err)
+				l.Write(fmt.Sprintf("Error sending message to client: %s", err))
 				return
 			}
 		}
@@ -113,7 +120,7 @@ func handleClient(client chat.Client) {
 		if err := json.Unmarshal([]byte(msg), &chatMsg); err == nil {
 			messages <- chatMsg
 		} else {
-			fmt.Println("Received invalid message:", msg)
+			l.Write(fmt.Sprintf("Received invalid message: %s", err))
 		}
 	}
 }
