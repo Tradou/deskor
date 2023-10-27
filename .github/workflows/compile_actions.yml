@@ -59,7 +59,7 @@ jobs:
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git fetch --all
-          git checkout -b windows-wip main
+          git checkout -f -b windows-wip main
           go install github.com/fyne-io/fyne-cross@latest
           go mod tidy
           rm server.go 2>/dev/null
@@ -79,7 +79,7 @@ jobs:
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git fetch --all
-          git checkout -b linux-wip main
+          git checkout -f -b linux-wip main
           go install github.com/fyne-io/fyne-cross@latest
           go mod tidy
           rm server.go 2>/dev/null
