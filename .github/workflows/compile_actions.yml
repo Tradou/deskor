@@ -24,6 +24,7 @@ jobs:
 
       - name: Compile server
         run: |
+          git reset --hard
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git fetch --all
@@ -54,6 +55,7 @@ jobs:
 
       - name: Compile for Windows
         run: |
+          git reset --hard
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git fetch --all
@@ -73,6 +75,7 @@ jobs:
 
       - name: Compile for Linux
         run: |
+          git reset --hard
           git config --global user.email ${{ secrets.GIT_USER }}@gmail.com
           git config --global user.name ${{ secrets.GIT_USER }}
           git fetch --all
