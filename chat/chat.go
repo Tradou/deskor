@@ -2,7 +2,6 @@ package chat
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net"
 )
@@ -48,7 +47,6 @@ func (c *Client) EncodeMessage(sender, text string) ([]byte, error) {
 func (c *Client) SendMessage(conn io.Writer, message []byte) error {
 	_, err := conn.Write(message)
 	if err != nil {
-		fmt.Println("Error while sending message")
 		return err
 	}
 	return nil

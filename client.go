@@ -71,7 +71,7 @@ func main() {
 
 		message, err := chater.EncodeMessage(sender, text)
 		if err != nil {
-			fmt.Println("Error while encoding message")
+			l.Write("Error while encoding message")
 			close(exit)
 		} else {
 			err = chater.SendMessage(conn, message)
