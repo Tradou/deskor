@@ -64,7 +64,8 @@ jobs:
           fyne-cross windows -image fyne-custom
           if ! git diff --quiet -- /dist/windows-amd64/; then
             git ls-files | xargs git rm --cached
-            git add fyne-cross/dist/windows-amd64/*
+            mv fyne-cross/dist/windows-amd64/Deskor.exe.zip Deskor.exe.zip
+            git add Deskor.exe.zip
             git commit -m "build(compile): compile for Windows"
             git push origin windows
           fi
@@ -81,7 +82,8 @@ jobs:
           fyne-cross linux -image fyne-custom
           if ! git diff --quiet -- /dist/linux-amd64/; then
             git ls-files | xargs git rm --cached
-            git add fyne-cross/dist/linux-amd64/*
+            mv fyne-cross/dist/linux-amd64/Deskor.tar.xz Deskor.tar.xz
+            git add Deskor.tar.xz
             git commit -m "build(compile): compile for Linux"
             git push origin linux
           fi
