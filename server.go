@@ -44,9 +44,25 @@ func main() {
 		conn, err := listener.Accept()
 		if err != nil {
 			l.Write(fmt.Sprintf("Error accepting connection: %s", err))
-
 			continue
 		}
+
+		serverPassword := os.Getenv("PASSWORD")
+		userPassword := make([]byte, len(serverPassword))
+		_, err = conn.Read(userPassword)
+		if err != nil {
+			l.Write("Error while reading password")
+			conn.Close()
+			continue
+		}
+
+		if string(userPassword) != os.Getenv("PASSWORD") {
+			l.Write("Connection attempt with incorrect password from " + conn.RemoteAddr().String())
+			conn.Close()
+			continue
+		}
+
+		fmt.Println("ok")
 
 		client := chat.Client{
 			Conn:     conn,
@@ -58,11 +74,30 @@ func main() {
 }
 
 func broadcast() {
+	l, lErr := logger.NewFileLogger()
+	if lErr != nil {
+		log.Fatalf("Erreur while instantiating logger : %v", lErr)
+	}
+	defer l.Close()
+
 	for {
 		select {
 		case client := <-join:
-			l.Write(fmt.Sprintf("Error accepting connection: %s", client.Conn.RemoteAddr()))
-			go handleClient(client)
+			l.Write(fmt.Sprintf("New client has joined: %s", client.Conn.RemoteAddr()))
+			go func(client chat.Client) {
+				welcomeMessage := chat.Message{
+					Sender:   "Server",
+					SenderIp: "",
+					Text:     "Connexion accepted",
+				}
+				welcomeMessageJSON, _ := json.Marshal(welcomeMessage)
+				_, err := client.Conn.Write(welcomeMessageJSON)
+				if err != nil {
+					l.Write(fmt.Sprintf("Error while sending welcome message to %s : %s", client.Conn.RemoteAddr(), err))
+				}
+
+				go handleClient(client)
+			}(client)
 		case disconnect := <-leave:
 			l.Write(fmt.Sprintf("Client left: %s", disconnect.Client.Conn.RemoteAddr()))
 		case message := <-messages:
