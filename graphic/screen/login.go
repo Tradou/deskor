@@ -6,22 +6,23 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func Auth() *fyne.Container {
+func Auth(w fyne.Window) *fyne.Container {
 	usernameWidget := widget.NewEntry()
 	usernameWidget.SetPlaceHolder("Username")
 
-	ipWidget := widget.NewEntry()
-	ipWidget.SetPlaceHolder("IP:PORT")
+	addrWidget := widget.NewEntry()
+	addrWidget.SetPlaceHolder("IP:PORT")
 
 	passwordWidget := widget.NewPasswordEntry()
 	passwordWidget.SetPlaceHolder("Password")
 
 	submitWidget := widget.NewButton("Submit", func() {
+		w.SetContent(Chat())
 	})
 
 	return container.NewVBox(
 		usernameWidget,
-		ipWidget,
+		addrWidget,
 		passwordWidget,
 		submitWidget,
 	)
