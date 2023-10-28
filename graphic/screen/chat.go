@@ -8,9 +8,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func Chat() *fyne.Container {
+func Chat(username string) *fyne.Container {
 	usernameWidget := widget.NewEntry()
-	usernameWidget.SetPlaceHolder("Enter your username")
+	usernameWidget.SetText(username)
+	usernameWidget.Disable()
 
 	messageWidget := widget.NewEntry()
 	messageWidget.SetPlaceHolder("Type your message and press Enter")
