@@ -16,8 +16,8 @@ func main() {
 	defer l.Close()
 	l.Write("Start app")
 
-	app := app.New()
-	window := app.NewWindow("Deskor")
+	myApp := app.New()
+	window := myApp.NewWindow("Deskor")
 
 	window.Resize(fyne.NewSize(600, 500))
 	window.SetContent(screen.Auth(window))
