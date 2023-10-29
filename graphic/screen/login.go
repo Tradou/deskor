@@ -1,13 +1,11 @@
 package screen
 
 import (
-	logger "deskor/log"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	"log"
 	"net"
 )
 
@@ -22,12 +20,20 @@ func Auth(w fyne.Window) *fyne.Container {
 	passwordWidget.SetPlaceHolder("Password")
 
 	submitWidget := widget.NewButton("Submit", func() {
-		_, err := SendAuthenticationRequest(passwordWidget.Text, addrWidget.Text)
-		if err != "" {
-			dialog.NewError(fmt.Errorf(err), w).Show()
-		} else {
-			w.SetContent(Chat(usernameWidget.Text))
+		conn, err := net.Dial("tcp", addrWidget.Text)
+		if err != nil {
+			dialog.NewError(fmt.Errorf("Error while connecting to server: %v", err), w).Show()
+			return
 		}
+
+		success, connErr := SendAuthenticationRequest(conn, passwordWidget.Text)
+		if !success {
+			dialog.NewError(fmt.Errorf(connErr), w).Show()
+			conn.Close()
+			return
+		}
+
+		w.SetContent(Chat(usernameWidget.Text))
 	})
 
 	return container.NewVBox(
@@ -38,19 +44,8 @@ func Auth(w fyne.Window) *fyne.Container {
 	)
 }
 
-func SendAuthenticationRequest(password, addr string) (bool, string) {
-	l, lErr := logger.NewFileLogger()
-	if lErr != nil {
-		log.Fatalf("Erreur while instantiating logger : %v", lErr)
-	}
-	defer l.Close()
-
-	conn, err := net.Dial("tcp", addr)
-	if err != nil {
-		return false, fmt.Sprintf("Error while connectin to server", err)
-	}
-
-	_, err = conn.Write([]byte(password))
+func SendAuthenticationRequest(conn net.Conn, password string) (bool, string) {
+	_, err := conn.Write([]byte(password))
 	if err != nil {
 		return false, "Error while sending request to server"
 	}
