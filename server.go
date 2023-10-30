@@ -46,15 +46,16 @@ func main() {
 		}
 
 		serverPassword := os.Getenv("PASSWORD")
-		userPassword := make([]byte, len(serverPassword))
-		_, err = conn.Read(userPassword)
-		if err != nil {
+
+		var req chat.Password
+
+		if err := json.NewDecoder(conn).Decode(&req); err != nil {
 			l.Write("Error while reading password")
 			conn.Close()
 			continue
 		}
 
-		if string(userPassword) != os.Getenv("PASSWORD") {
+		if req.Password != serverPassword {
 			l.Write("Connection attempt with incorrect password from " + conn.RemoteAddr().String())
 			conn.Close()
 			continue

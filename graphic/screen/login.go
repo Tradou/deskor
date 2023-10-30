@@ -1,7 +1,9 @@
 package screen
 
 import (
+	"deskor/chat"
 	"deskor/log"
+	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -50,7 +52,16 @@ func Auth(w fyne.Window) *fyne.Container {
 }
 
 func SendAuthenticationRequest(conn net.Conn, password string) (bool, string) {
-	_, err := conn.Write([]byte(password))
+	p := chat.Password{
+		Password: password,
+	}
+
+	jsonPassword, err := json.Marshal(p)
+	if err != nil {
+		return false, "Error while encoding the password request"
+	}
+
+	_, err = conn.Write(jsonPassword)
 	if err != nil {
 		return false, "Error while sending request to server"
 	}
