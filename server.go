@@ -2,7 +2,7 @@ package main
 
 import (
 	"deskor/chat"
-	logger "deskor/log"
+	"deskor/log"
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -15,11 +15,12 @@ var clients = make(map[chat.Client]bool)
 var join = make(chan chat.Client)
 var leave = make(chan chat.Disconnect)
 var messages = make(chan chat.Message)
-var l *logger.FileLogger
 
 func main() {
-	logger.New()
-	l := logger.Get()
+	l, lErr := logger.NewFileLogger()
+	if lErr != nil {
+		log.Fatalf("Erreur while instantiating logger : %v", lErr)
+	}
 	defer l.Close()
 
 	l.Write("Server has just started")
@@ -114,6 +115,12 @@ func broadcast() {
 }
 
 func handleClient(client chat.Client) {
+	l, lErr := logger.NewFileLogger()
+	if lErr != nil {
+		log.Fatalf("Erreur while instantiating logger : %v", lErr)
+	}
+	defer l.Close()
+
 	clients[client] = true
 	defer func() {
 		delete(clients, client)
