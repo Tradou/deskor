@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
-	"log"
 	"net"
 	"os"
 )
@@ -15,12 +14,11 @@ var clients = make(map[chat.Client]bool)
 var join = make(chan chat.Client)
 var leave = make(chan chat.Disconnect)
 var messages = make(chan chat.Message)
+var l *logger.FileLogger
 
 func main() {
-	l, lErr := logger.NewFileLogger()
-	if lErr != nil {
-		log.Fatalf("Erreur while instantiating logger : %v", lErr)
-	}
+	logger.New()
+	l = logger.Get()
 	defer l.Close()
 
 	l.Write("Server has just started")
@@ -62,8 +60,6 @@ func main() {
 			continue
 		}
 
-		fmt.Println("ok")
-
 		client := chat.Client{
 			Conn:     conn,
 			Messages: make(chan chat.Message),
@@ -74,12 +70,6 @@ func main() {
 }
 
 func broadcast() {
-	l, lErr := logger.NewFileLogger()
-	if lErr != nil {
-		log.Fatalf("Erreur while instantiating logger : %v", lErr)
-	}
-	defer l.Close()
-
 	for {
 		select {
 		case client := <-join:
@@ -115,12 +105,6 @@ func broadcast() {
 }
 
 func handleClient(client chat.Client) {
-	l, lErr := logger.NewFileLogger()
-	if lErr != nil {
-		log.Fatalf("Erreur while instantiating logger : %v", lErr)
-	}
-	defer l.Close()
-
 	clients[client] = true
 	defer func() {
 		delete(clients, client)
