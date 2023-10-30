@@ -5,16 +5,13 @@ import (
 	"deskor/log"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"log"
 )
 
 func main() {
-	l, lErr := logger.NewFileLogger()
-	if lErr != nil {
-		log.Fatalf("Erreur while instantiating logger : %v", lErr)
-	}
-	defer l.Close()
-	l.Write("Start app")
+	logger.New()
+	clientLog := logger.Get()
+	defer clientLog.Close()
+	clientLog.Write("Start app")
 
 	myApp := app.New()
 	window := myApp.NewWindow("Deskor")

@@ -1,6 +1,7 @@
 package screen
 
 import (
+	"deskor/log"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -10,6 +11,10 @@ import (
 )
 
 func Auth(w fyne.Window) *fyne.Container {
+	clientLog := logger.Get()
+	defer clientLog.Close()
+	clientLog.Write("Auth screen render")
+
 	usernameWidget := widget.NewEntry()
 	usernameWidget.SetPlaceHolder("Username")
 
@@ -22,7 +27,7 @@ func Auth(w fyne.Window) *fyne.Container {
 	submitWidget := widget.NewButton("Submit", func() {
 		conn, err := net.Dial("tcp", addrWidget.Text)
 		if err != nil {
-			dialog.NewError(fmt.Errorf("Error while connecting to server: %v", err), w).Show()
+			dialog.NewError(fmt.Errorf("error while connecting to server: %v", err), w).Show()
 			return
 		}
 

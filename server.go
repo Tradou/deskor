@@ -18,12 +18,11 @@ var messages = make(chan chat.Message)
 var l *logger.FileLogger
 
 func main() {
-	l, lErr := logger.NewFileLogger()
-	if lErr != nil {
-		log.Fatalf("Erreur while instantiating logger : %v", lErr)
-	}
+	logger.New()
+	l := logger.Get()
 	defer l.Close()
-	l.Write("Start server")
+
+	l.Write("Server has just started")
 
 	err := godotenv.Load(".env.server")
 	if err != nil {

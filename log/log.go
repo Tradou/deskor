@@ -92,7 +92,7 @@ func (f *FileLogger) OpenOrCreate() error {
 
 func (f *FileLogger) Write(message string) {
 	if f.logFile == nil {
-		log.Fatalf("Fichier journal non ouvert : %s", f.filePath)
+		log.Fatalf("Can't open log file : %s", f.filePath)
 		return
 	}
 
