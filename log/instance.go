@@ -7,7 +7,7 @@ import (
 )
 
 type Instance struct {
-	logger Logger
+	logger *FileLogger
 	once   sync.Once
 }
 
@@ -29,7 +29,7 @@ func New() {
 	instance.once.Do(instance.init)
 }
 
-func Get() Logger {
+func Get() *FileLogger {
 	fmt.Println("Get instance")
 	return instance.logger
 }
