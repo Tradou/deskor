@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"log"
 	"sync"
 )
@@ -16,7 +15,7 @@ var instance Instance
 func (l *Instance) init() {
 	var err error
 	l.logger, err = NewFileLogger()
-	fmt.Println("Attempt to instantiate new logger")
+
 	if err != nil {
 		log.Fatalf("Error while instantiated logger: %v", err)
 	} else {
@@ -25,11 +24,9 @@ func (l *Instance) init() {
 }
 
 func New() {
-	fmt.Println("Start new fn")
 	instance.once.Do(instance.init)
 }
 
 func Get() *FileLogger {
-	fmt.Println("Get instance")
 	return instance.logger
 }
