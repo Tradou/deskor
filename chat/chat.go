@@ -13,10 +13,6 @@ type Message struct {
 	IChat
 }
 
-type Password struct {
-	Password string `json:"password"`
-}
-
 type Client struct {
 	Conn     net.Conn
 	Messages chan Message

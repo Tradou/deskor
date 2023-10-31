@@ -1,15 +1,10 @@
 package screen
 
 import (
-	"deskor/chat"
 	"deskor/log"
-	"encoding/json"
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	"net"
 )
 
 func Auth(w fyne.Window) *fyne.Container {
@@ -23,56 +18,13 @@ func Auth(w fyne.Window) *fyne.Container {
 	addrWidget := widget.NewEntry()
 	addrWidget.SetPlaceHolder("IP:PORT")
 
-	passwordWidget := widget.NewPasswordEntry()
-	passwordWidget.SetPlaceHolder("Password")
-
 	submitWidget := widget.NewButton("Submit", func() {
-		conn, err := net.Dial("tcp", addrWidget.Text)
-		if err != nil {
-			dialog.NewError(fmt.Errorf("error while connecting to server: %v", err), w).Show()
-			return
-		}
-
-		success, connErr := SendAuthenticationRequest(conn, passwordWidget.Text)
-		if !success {
-			dialog.NewError(fmt.Errorf(connErr), w).Show()
-			conn.Close()
-			return
-		}
-
 		w.SetContent(Chat(usernameWidget.Text))
 	})
 
 	return container.NewVBox(
 		usernameWidget,
 		addrWidget,
-		passwordWidget,
 		submitWidget,
 	)
-}
-
-func SendAuthenticationRequest(conn net.Conn, password string) (bool, string) {
-	p := chat.Password{
-		Password: password,
-	}
-
-	jsonPassword, err := json.Marshal(p)
-	if err != nil {
-		return false, "Error while encoding the password request"
-	}
-
-	_, err = conn.Write(jsonPassword)
-	if err != nil {
-		return false, "Error while sending request to server"
-	}
-
-	response := make([]byte, 64)
-
-	_, err = conn.Read(response)
-
-	if err != nil {
-		return false, "Bad authentication"
-	}
-
-	return true, ""
 }
