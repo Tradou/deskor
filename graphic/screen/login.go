@@ -1,7 +1,7 @@
 package screen
 
 import (
-	"deskor/log"
+	logger "deskor/log"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
