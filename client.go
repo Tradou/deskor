@@ -2,7 +2,7 @@ package main
 
 import (
 	"deskor/graphic/screen"
-	"deskor/log"
+	logger "deskor/log"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 )
