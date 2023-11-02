@@ -120,7 +120,6 @@ func handleClient(client chat.Client) {
 		delete(clients, client)
 		leave <- chat.Disconnect{client}
 		client.Conn.Close()
-		connected--
 	}()
 
 	go func() {
