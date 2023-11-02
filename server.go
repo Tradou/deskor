@@ -17,6 +17,7 @@ var join = make(chan chat.Client)
 var leave = make(chan chat.Disconnect)
 var messages = make(chan chat.Message)
 var l *logger.FileLogger
+var connected int
 
 func main() {
 	logger.New()
@@ -92,10 +93,11 @@ func broadcast() {
 				if err != nil {
 					l.Write(fmt.Sprintf("Error while sending welcome message to %s : %s", client.Conn.RemoteAddr(), err))
 				}
-
+				connected++
 				go handleClient(client)
 			}(client)
 		case disconnect := <-leave:
+			connected--
 			l.Write(fmt.Sprintf("Client left: %s", disconnect.Client.Conn.RemoteAddr()))
 		case message := <-messages:
 			for client := range clients {
@@ -117,6 +119,7 @@ func handleClient(client chat.Client) {
 		delete(clients, client)
 		leave <- chat.Disconnect{client}
 		client.Conn.Close()
+		connected--
 	}()
 
 	go func() {

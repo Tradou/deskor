@@ -7,9 +7,10 @@ import (
 )
 
 type Message struct {
-	Sender   string `json:"sender"`
-	SenderIp string `json:"senderIp"`
-	Text     string `json:"text"`
+	Sender    string `json:"sender"`
+	SenderIp  string `json:"senderIp"`
+	Text      string `json:"text"`
+	Connected int    `json:"int"`
 	IChat
 }
 
