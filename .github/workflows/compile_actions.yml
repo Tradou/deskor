@@ -33,7 +33,7 @@ jobs:
             mv bin/server server
             mv .env.server.sample .env.server
             mv build/server/README.md README.md
-            git add server .env.server README.md
+            git add -f server .env.server README.md
             git commit -m "build(compile): compile for server"
             git push origin -d server
             git push origin server-wip:server
