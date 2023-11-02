@@ -50,6 +50,11 @@ func (f *FileLogger) Open() error {
 	if f.logFile != nil {
 		f.logFile.Close()
 	}
+	if !f.DirectoryExists("logs") {
+		if err := os.Mkdir("logs", 0755); err != nil {
+			return err
+		}
+	}
 	if f.Exists() {
 		file, err := os.OpenFile(f.filePath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
 		if err != nil {
@@ -61,6 +66,14 @@ func (f *FileLogger) Open() error {
 		err := f.Create()
 		return err
 	}
+}
+
+func (f *FileLogger) DirectoryExists(dirPath string) bool {
+	_, err := os.Stat(dirPath)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 func (f *FileLogger) Close() error {
