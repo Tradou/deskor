@@ -11,7 +11,7 @@ func main() {
 	logger.New()
 	clientLog := logger.Get()
 	defer clientLog.Close()
-	clientLog.Write("Start app")
+	clientLog.Write("Start running client")
 
 	myApp := app.New()
 	window := myApp.NewWindow("Deskor")

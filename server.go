@@ -1,12 +1,14 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/tls"
+	"crypto/x509"
 	"deskor/chat"
 	"deskor/log"
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
-	"net"
 	"os"
 )
 
@@ -29,7 +31,27 @@ func main() {
 	}
 	port := os.Getenv("PORT")
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))
+	cert, err := tls.LoadX509KeyPair("./cert/server.pem", "./cert/server.key")
+	if err != nil {
+		l.Write(fmt.Sprintf("Error while loading pair certificate: %s", err))
+
+	}
+
+	caCert, err := os.ReadFile("./cert/ca.crt")
+	if err != nil {
+		l.Write(fmt.Sprintf("Error while reading ca certificate: %s", err))
+	}
+
+	caPool := x509.NewCertPool()
+	caPool.AppendCertsFromPEM(caCert)
+
+	config := tls.Config{
+		Certificates: []tls.Certificate{cert},
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientCAs:    caPool,
+	}
+	config.Rand = rand.Reader
+	listener, err := tls.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port), &config)
 	if err != nil {
 		l.Write(fmt.Sprintf("Error starting the server: %s", err))
 		return
@@ -63,7 +85,7 @@ func broadcast() {
 				welcomeMessage := chat.Message{
 					Sender:   "Server",
 					SenderIp: "",
-					Text:     "Connexion accepted",
+					Text:     "Someone has arrived",
 				}
 				welcomeMessageJSON, _ := json.Marshal(welcomeMessage)
 				_, err := client.Conn.Write(welcomeMessageJSON)
