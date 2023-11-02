@@ -84,9 +84,10 @@ func broadcast() {
 			l.Write(fmt.Sprintf("New client has joined: %s", client.Conn.RemoteAddr()))
 			go func(client chat.Client) {
 				welcomeMessage := chat.Message{
-					Sender:   "Server",
-					SenderIp: "",
-					Text:     "Someone has arrived",
+					Sender:    "Server",
+					SenderIp:  "",
+					Text:      "Someone has arrived",
+					Connected: connected,
 				}
 				welcomeMessageJSON, _ := json.Marshal(welcomeMessage)
 				_, err := client.Conn.Write(welcomeMessageJSON)
@@ -125,9 +126,10 @@ func handleClient(client chat.Client) {
 	go func() {
 		for message := range client.Messages {
 			msg := chat.Message{
-				Sender:   message.Sender,
-				SenderIp: client.Conn.RemoteAddr().String(),
-				Text:     message.Text,
+				Sender:    message.Sender,
+				SenderIp:  client.Conn.RemoteAddr().String(),
+				Text:      message.Text,
+				Connected: connected,
 			}
 
 			messageJSON, err := json.Marshal(msg)

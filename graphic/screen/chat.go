@@ -44,7 +44,6 @@ func Chat(username string, conn *tls.Conn) *fyne.Container {
 		chater := &chat.Client{}
 
 		cypherText, err := encrypter.Encrypt(text)
-		fmt.Printf("FROM: %s ENCODE: %s", text, cypherText)
 		if err != nil {
 			fmt.Print("Error while encrypting message")
 		}
@@ -83,9 +82,7 @@ func Chat(username string, conn *tls.Conn) *fyne.Container {
 				fmt.Println("Error while reading message", err)
 			}
 
-			fmt.Printf("encoded: %s", receivedMessage.Text)
 			receivedMessage.Text, err = encrypter.Decrypt(receivedMessage.Text)
-			fmt.Printf(fmt.Sprintf("decoded: %s", receivedMessage.Text))
 			if err != nil {
 				fmt.Print("Error while decrypting message")
 			} else {
@@ -99,8 +96,9 @@ func Chat(username string, conn *tls.Conn) *fyne.Container {
 		}
 	}()
 
-	topContainer := graphic.NewAdaptiveGridWithRatios([]float32{0.80, 0.15, 0.05},
+	topContainer := graphic.NewAdaptiveGridWithRatios([]float32{0.60, 0.35, 0.05},
 		usernameWidget,
+		connectedWidget,
 		notificationWidget,
 	)
 
