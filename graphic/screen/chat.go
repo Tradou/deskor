@@ -25,6 +25,10 @@ func Chat(username string, conn *tls.Conn) *fyne.Container {
 
 	chatWidget := widget.NewLabel("Chat will appear here")
 
+	connectedWidget := widget.NewEntry()
+	connectedWidget.SetText("Loading connected people")
+	connectedWidget.Disable()
+
 	chatScroller := container.NewVScroll(chatWidget)
 	var notificationWidget *widget.Button
 	notificationWidget = widget.NewButtonWithIcon("", notification.GetIcon(), func() {
@@ -90,11 +94,12 @@ func Chat(username string, conn *tls.Conn) *fyne.Container {
 				if notification.IsEnabled() && usernameWidget.Text != receivedMessage.Sender {
 					notification.Sound()
 				}
+				connectedWidget.SetText(fmt.Sprintf("Connected people: %d", receivedMessage.Connected))
 			}
 		}
 	}()
 
-	topContainer := graphic.NewAdaptiveGridWithRatios([]float32{0.95, 0.05},
+	topContainer := graphic.NewAdaptiveGridWithRatios([]float32{0.80, 0.15, 0.05},
 		usernameWidget,
 		notificationWidget,
 	)
