@@ -76,7 +76,7 @@ jobs:
           fi
 
   compile-linux:
-    name: Compile clients
+    name: Compile linux
     runs-on: ubuntu-latest
 
     steps:

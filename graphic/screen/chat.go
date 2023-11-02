@@ -3,6 +3,7 @@ package screen
 import (
 	"crypto/tls"
 	"deskor/chat"
+	"deskor/encrypt"
 	"deskor/graphic"
 	"deskor/notification"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 )
 
 func Chat(username string, conn *tls.Conn) *fyne.Container {
+	encrypter := encrypt.EncrypterImpl{}
 	usernameWidget := widget.NewEntry()
 	usernameWidget.SetText(username)
 	usernameWidget.Disable()
@@ -37,7 +39,13 @@ func Chat(username string, conn *tls.Conn) *fyne.Container {
 		sender := usernameWidget.Text
 		chater := &chat.Client{}
 
-		message, err := chater.EncodeMessage(sender, text)
+		cypherText, err := encrypter.Encrypt(text)
+		fmt.Printf("FROM: %s ENCODE: %s", text, cypherText)
+		if err != nil {
+			fmt.Print("Error while encrypting message")
+		}
+
+		message, err := chater.EncodeMessage(sender, cypherText)
 		if err != nil {
 			fmt.Print("Error while encoding message")
 			close(exit)
@@ -71,10 +79,17 @@ func Chat(username string, conn *tls.Conn) *fyne.Container {
 				fmt.Println("Error while reading message", err)
 			}
 
-			chatWidget.SetText(chatWidget.Text + "\n" + receivedMessage.Sender + ": " + receivedMessage.Text)
-			chatScroller.ScrollToBottom()
-			if notification.IsEnabled() && usernameWidget.Text != receivedMessage.Sender {
-				notification.Sound()
+			fmt.Printf("encoded: %s", receivedMessage.Text)
+			receivedMessage.Text, err = encrypter.Decrypt(receivedMessage.Text)
+			fmt.Printf(fmt.Sprintf("decoded: %s", receivedMessage.Text))
+			if err != nil {
+				fmt.Print("Error while decrypting message")
+			} else {
+				chatWidget.SetText(chatWidget.Text + "\n" + receivedMessage.Sender + ": " + receivedMessage.Text)
+				chatScroller.ScrollToBottom()
+				if notification.IsEnabled() && usernameWidget.Text != receivedMessage.Sender {
+					notification.Sound()
+				}
 			}
 		}
 	}()
