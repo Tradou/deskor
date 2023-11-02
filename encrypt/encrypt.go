@@ -10,8 +10,6 @@ import (
 	"os"
 )
 
-//openssl rand -out encrypt.key 32
-
 type Encrypter interface {
 	Encrypt(plaintext string) (string, error)
 	Decrypt(ciphertext string) (string, error)
