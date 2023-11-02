@@ -68,9 +68,8 @@ jobs:
           if ! git diff --quiet -- /dist/windows-amd64/; then
             git ls-files | xargs git rm --cached
             mv fyne-cross/dist/windows-amd64/Deskor.exe.zip Deskor.exe.zip
-            mv .env.client.sample .env.client
             mv build/client/README.md README.md
-            git add Deskor.exe.zip .env.client README.md
+            git add Deskor.exe.zip README.md
             git commit -m "build(compile): compile for Windows"
             git push origin -d windows
             git push origin windows-wip:windows
@@ -105,9 +104,8 @@ jobs:
           if ! git diff --quiet -- /dist/linux-amd64/; then
             git ls-files | xargs git rm --cached
             mv fyne-cross/dist/linux-amd64/Deskor.tar.xz Deskor.tar.xz
-            mv .env.client.sample .env.client
             mv build/client/README.md README.md
-            git add Deskor.tar.xz .env.client README.md
+            git add Deskor.tar.xz README.md
             git commit -m "build(compile): compile for Linux"
             git push origin -d linux
             git push origin linux-wip:linux
