@@ -1,7 +1,9 @@
 package chat
 
 import (
+	"deskor/encrypt"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 )
@@ -32,9 +34,15 @@ type IChat interface {
 }
 
 func (c *Client) EncodeMessage(sender, text string) ([]byte, error) {
+	encrypter := encrypt.EncrypterImpl{}
+
+	cypherText, err := encrypter.Encrypt(text)
+	if err != nil {
+		fmt.Print("Error while encrypting message")
+	}
 	message := Message{
 		Sender: sender,
-		Text:   text,
+		Text:   cypherText,
 	}
 
 	messageJSON, err := json.Marshal(message)
@@ -64,10 +72,19 @@ func (c *Client) ReceiveMessage(conn io.Reader) (string, error) {
 	return message, nil
 }
 
-func (c *Client) DecodeMessage(messageData string) (Message, error) {
+func (c *Client) DecodeMessage(message string) (Message, error) {
 	var receivedMessage Message
-	if err := json.Unmarshal([]byte(messageData), &receivedMessage); err != nil {
+	encrypter := encrypt.EncrypterImpl{}
+	var err error
+
+	if err := json.Unmarshal([]byte(message), &receivedMessage); err != nil {
 		return Message{}, err
 	}
+
+	receivedMessage.Text, err = encrypter.Decrypt(receivedMessage.Text)
+	if err != nil {
+		fmt.Print("Error while decrypting message")
+	}
+
 	return receivedMessage, nil
 }
