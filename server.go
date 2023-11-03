@@ -84,7 +84,7 @@ func broadcast() {
 			l.Write(fmt.Sprintf("New client has joined: %s", client.Conn.RemoteAddr()))
 			go func(client chat.Client) {
 				welcomeMessage := chat.Message{
-					Sender:    "Server",
+					Sender:    "SERVER",
 					SenderIp:  "",
 					Text:      "Someone has arrived",
 					Connected: connected,
