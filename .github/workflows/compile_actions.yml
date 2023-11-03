@@ -66,7 +66,7 @@ jobs:
             git ls-files | xargs git rm --cached
             mv fyne-cross/bin/windows-amd64/Deskor.exe Deskor.exe
             mv build/client/README.md README.md
-            git add Deskor.exe.zip README.md
+            git add Deskor.exe README.md
             git commit -m "build(compile): compile for Windows"
             git push origin -d windows
             git push origin windows-wip:windows
@@ -102,7 +102,7 @@ jobs:
             git ls-files | xargs git rm --cached
             mv fyne-cross/bin/linux-amd64/deskor deskor
             mv build/client/README.md README.md
-            git add Deskor.tar.xz README.md
+            git add deskor README.md
             git commit -m "build(compile): compile for Linux"
             git push origin -d linux
             git push origin linux-wip:linux
