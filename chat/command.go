@@ -19,7 +19,7 @@ func ShouldBeEncrypt(msg Message) bool {
 }
 
 func ShouldBeDecrypt(msg Message) bool {
-	return IsCommand(msg) || isAnnouncement(msg)
+	return !(IsCommand(msg) || isAnnouncement(msg))
 }
 
 func Dispatch(msg Message) Message {
