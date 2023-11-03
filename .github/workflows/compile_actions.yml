@@ -62,9 +62,9 @@ jobs:
           go mod tidy
           rm server.go 2>/dev/null
           fyne-cross windows -image fyne-custom
-          if ! git diff --quiet -- /dist/windows-amd64/; then
+          if ! git diff --quiet -- /bin/windows-amd64/; then
             git ls-files | xargs git rm --cached
-            mv fyne-cross/dist/windows-amd64/Deskor.exe.zip Deskor.exe.zip
+            mv fyne-cross/bin/windows-amd64/Deskor.exe Deskor.exe
             mv build/client/README.md README.md
             git add Deskor.exe.zip README.md
             git commit -m "build(compile): compile for Windows"
@@ -98,9 +98,9 @@ jobs:
           go mod tidy
           rm server.go 2>/dev/null
           fyne-cross linux -image fyne-custom
-          if ! git diff --quiet -- /dist/linux-amd64/; then
+          if ! git diff --quiet -- /bin/linux-amd64/; then
             git ls-files | xargs git rm --cached
-            mv fyne-cross/dist/linux-amd64/Deskor.tar.xz Deskor.tar.xz
+            mv fyne-cross/bin/linux-amd64/deskor deskor
             mv build/client/README.md README.md
             git add Deskor.tar.xz README.md
             git commit -m "build(compile): compile for Linux"
