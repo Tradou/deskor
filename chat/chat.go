@@ -36,16 +36,21 @@ type IChat interface {
 func (c *Client) EncodeMessage(sender, text string) ([]byte, error) {
 	encrypter := encrypt.EncrypterImpl{}
 
-	cypherText, err := encrypter.Encrypt(text)
-	if err != nil {
-		fmt.Print("Error while encrypting message")
-	}
 	message := Message{
 		Sender: sender,
-		Text:   cypherText,
+		Text:   text,
+	}
+
+	if ShouldBeEncrypt(message) {
+		cypherText, err := encrypter.Encrypt(text)
+		if err != nil {
+			fmt.Print("Error while encrypting message")
+		}
+		message.Text = cypherText
 	}
 
 	messageJSON, err := json.Marshal(message)
+
 	if err != nil {
 		return nil, err
 	}
@@ -81,9 +86,11 @@ func (c *Client) DecodeMessage(message string) (Message, error) {
 		return Message{}, err
 	}
 
-	receivedMessage.Text, err = encrypter.Decrypt(receivedMessage.Text)
-	if err != nil {
-		fmt.Print("Error while decrypting message")
+	if ShouldBeDecrypt(receivedMessage) {
+		receivedMessage.Text, err = encrypter.Decrypt(receivedMessage.Text)
+		if err != nil {
+			fmt.Print("Error while decrypting message")
+		}
 	}
 
 	return receivedMessage, nil
