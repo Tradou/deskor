@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func Auth(w fyne.Window) *fyne.Container {
+func Auth(app fyne.App, w fyne.Window) *fyne.Container {
 	logger.New()
 	clientLog := logger.Get()
 	defer clientLog.Close()
@@ -36,7 +36,7 @@ func Auth(w fyne.Window) *fyne.Container {
 			return
 		}
 
-		w.SetContent(Chat(usernameWidget.Text, conn))
+		w.SetContent(Chat(usernameWidget.Text, conn, app))
 	})
 
 	return container.NewVBox(

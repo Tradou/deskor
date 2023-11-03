@@ -13,7 +13,7 @@ import (
 	"os/signal"
 )
 
-func Chat(username string, conn *tls.Conn) *fyne.Container {
+func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
 	usernameWidget := widget.NewEntry()
 	usernameWidget.SetText(username)
 	usernameWidget.Disable()
@@ -76,6 +76,7 @@ func Chat(username string, conn *tls.Conn) *fyne.Container {
 				chatScroller.ScrollToBottom()
 				if notification.IsEnabled() && usernameWidget.Text != receivedMessage.Sender {
 					notification.Sound()
+					notification.Popup(app, receivedMessage.Sender)
 				}
 				connectedWidget.SetText(fmt.Sprintf("Connected people: %d", receivedMessage.Connected))
 			} else {
