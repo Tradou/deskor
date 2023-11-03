@@ -3,7 +3,6 @@ package screen
 import (
 	"crypto/tls"
 	"deskor/chat"
-	"deskor/encrypt"
 	"deskor/graphic"
 	"deskor/notification"
 	"fmt"
@@ -15,7 +14,6 @@ import (
 )
 
 func Chat(username string, conn *tls.Conn) *fyne.Container {
-	encrypter := encrypt.EncrypterImpl{}
 	usernameWidget := widget.NewEntry()
 	usernameWidget.SetText(username)
 	usernameWidget.Disable()
