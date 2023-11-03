@@ -6,7 +6,7 @@ import (
 
 var PrefixCommand = "/"
 
-func isCommand(msg Message) bool {
+func IsCommand(msg Message) bool {
 	return strings.HasPrefix(msg.Text, PrefixCommand)
 }
 
@@ -15,9 +15,36 @@ func isAnnouncement(msg Message) bool {
 }
 
 func ShouldBeEncrypt(msg Message) bool {
-	return isCommand(msg) || isAnnouncement(msg)
+	return IsCommand(msg) || isAnnouncement(msg)
 }
 
 func ShouldBeDecrypt(msg Message) bool {
-	return isCommand(msg) || isAnnouncement(msg)
+	return IsCommand(msg) || isAnnouncement(msg)
+}
+
+func Dispatch(msg Message) Message {
+	switch msg.Text[1:] {
+	case "ping":
+		return ping(msg)
+	default:
+		return unknown(msg)
+	}
+}
+
+func ping(msg Message) Message {
+	return Message{
+		Sender:    "SERVER",
+		SenderIp:  "",
+		Text:      "Pong",
+		Connected: msg.Connected,
+	}
+}
+
+func unknown(msg Message) Message {
+	return Message{
+		Sender:    "SERVER",
+		SenderIp:  "",
+		Text:      "This command does not exists",
+		Connected: msg.Connected,
+	}
 }

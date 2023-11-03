@@ -131,6 +131,10 @@ func handleClient(client chat.Client) {
 				Connected: connected,
 			}
 
+			if chat.IsCommand(msg) {
+				msg = chat.Dispatch(msg)
+			}
+
 			messageJSON, err := json.Marshal(msg)
 			if err != nil {
 				l.Write(fmt.Sprintf("Error sending message to client: %s", err))
