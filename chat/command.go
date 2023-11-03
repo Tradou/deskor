@@ -15,11 +15,11 @@ func isAnnouncement(msg Message) bool {
 }
 
 func ShouldBeEncrypt(msg Message) bool {
-	return IsCommand(msg) || isAnnouncement(msg)
+	return !(IsCommand(msg) || isAnnouncement(msg))
 }
 
 func ShouldBeDecrypt(msg Message) bool {
-	return !(IsCommand(msg) || isAnnouncement(msg))
+	return ShouldBeEncrypt(msg)
 }
 
 func Dispatch(msg Message) Message {

@@ -17,6 +17,6 @@ func main() {
 	window := myApp.NewWindow("Deskor")
 
 	window.Resize(fyne.NewSize(600, 500))
-	window.SetContent(screen.Auth(window))
+	window.SetContent(screen.Auth(myApp, window))
 	window.ShowAndRun()
 }
