@@ -1,37 +1,32 @@
 package chat
 
-import (
-	"strings"
-)
+const prefixCommand = "/"
 
-var PrefixCommand = "/"
-
-func IsCommand(msg Message) bool {
-	return strings.HasPrefix(msg.Text, PrefixCommand)
+type Commander interface {
+	Dispatch(msg Message) Message
 }
 
-func isAnnouncement(msg Message) bool {
-	return msg.Sender == "SERVER" && msg.SenderIp == ""
-}
-
-func ShouldBeEncrypt(msg Message) bool {
-	return !(IsCommand(msg) || isAnnouncement(msg))
-}
-
-func ShouldBeDecrypt(msg Message) bool {
-	return ShouldBeEncrypt(msg)
-}
+type Cmd struct{}
 
 func Dispatch(msg Message) Message {
-	switch msg.Text[1:] {
-	case "ping":
-		return ping(msg)
-	default:
-		return unknown(msg)
+	functions := map[string]struct {
+		fn          func(message Message) Message
+		description string
+	}{
+		"ping": {
+			fn:          callPing,
+			description: "Play ping-pong",
+		},
+	}
+
+	if entry, found := functions[msg.Text[1:]]; found {
+		return entry.fn(msg)
+	} else {
+		return callUnknown(msg)
 	}
 }
 
-func ping(msg Message) Message {
+func (c *Cmd) ping(msg Message) Message {
 	return Message{
 		Sender:    "SERVER",
 		SenderIp:  "",
@@ -40,11 +35,21 @@ func ping(msg Message) Message {
 	}
 }
 
-func unknown(msg Message) Message {
+func (c *Cmd) unknown(msg Message) Message {
 	return Message{
 		Sender:    "SERVER",
 		SenderIp:  "",
 		Text:      "This command does not exists",
 		Connected: msg.Connected,
 	}
+}
+
+func callPing(msg Message) Message {
+	ms := Cmd{}
+	return ms.ping(msg)
+}
+
+func callUnknown(msg Message) Message {
+	ms := Cmd{}
+	return ms.unknown(msg)
 }

@@ -14,6 +14,10 @@ import (
 )
 
 func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
+	client := &chat.Client{
+		Conn: conn,
+	}
+
 	usernameWidget := widget.NewEntry()
 	usernameWidget.SetText(username)
 	usernameWidget.Disable()
@@ -39,14 +43,13 @@ func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
 
 	messageWidget.OnSubmitted = func(text string) {
 		sender := usernameWidget.Text
-		chater := &chat.Client{}
 
-		message, err := chater.EncodeMessage(sender, text)
+		message, err := client.EncodeMessage(sender, text)
 		if err != nil {
 			fmt.Print("Error while encoding message")
 			close(exit)
 		} else {
-			err = chater.SendMessage(conn, message)
+			err = client.SendMessage(message)
 			if err != nil {
 				fmt.Print("Error while sending message")
 				close(exit)
@@ -57,9 +60,7 @@ func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
 
 	go func() {
 		for {
-			chater := &chat.Client{}
-
-			message, err := chater.ReceiveMessage(conn)
+			message, err := client.ReceiveMessage()
 			if err != nil {
 				fmt.Print("Error while receiving message")
 				close(exit)
@@ -67,7 +68,7 @@ func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
 			}
 
 			var receivedMessage chat.Message
-			decodedMessage, err := chater.DecodeMessage(message)
+			decodedMessage, err := client.DecodeMessage(message)
 
 			if err == nil {
 				receivedMessage = decodedMessage

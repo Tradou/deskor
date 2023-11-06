@@ -1,15 +1,11 @@
 package main
 
 import (
-	"crypto/rand"
-	"crypto/tls"
-	"crypto/x509"
 	"deskor/chat"
+	"deskor/connect"
 	"deskor/log"
 	"encoding/json"
 	"fmt"
-	"github.com/joho/godotenv"
-	"os"
 )
 
 var clients = make(map[chat.Client]bool)
@@ -26,53 +22,19 @@ func main() {
 
 	l.Write("Server has just started")
 
-	err := godotenv.Load(".env.server")
+	listener, err := connect.Setup()
 	if err != nil {
-		l.Write("Error loading env var")
-	}
-	port := os.Getenv("PORT")
-
-	cert, err := tls.LoadX509KeyPair("./cert/server.pem", "./cert/server.key")
-	if err != nil {
-		l.Write(fmt.Sprintf("Error while loading pair certificate: %s", err))
-
-	}
-
-	caCert, err := os.ReadFile("./cert/ca.crt")
-	if err != nil {
-		l.Write(fmt.Sprintf("Error while reading ca certificate: %s", err))
-	}
-
-	caPool := x509.NewCertPool()
-	caPool.AppendCertsFromPEM(caCert)
-
-	config := tls.Config{
-		Certificates: []tls.Certificate{cert},
-		ClientAuth:   tls.RequireAndVerifyClientCert,
-		ClientCAs:    caPool,
-	}
-	config.Rand = rand.Reader
-	listener, err := tls.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port), &config)
-	if err != nil {
-		l.Write(fmt.Sprintf("Error starting the server: %s", err))
-		return
+		l.Write(fmt.Sprint(err))
 	}
 	defer listener.Close()
 
 	go broadcast()
 
 	for {
-		conn, err := listener.Accept()
+		client, err := connect.Accept(listener)
 		if err != nil {
-			l.Write(fmt.Sprintf("Error accepting connection: %s", err))
-			continue
+			fmt.Printf("Error accepting connection: %s", err)
 		}
-
-		client := chat.Client{
-			Conn:     conn,
-			Messages: make(chan chat.Message),
-		}
-
 		join <- client
 	}
 }
@@ -118,7 +80,7 @@ func handleClient(client chat.Client) {
 	clients[client] = true
 	defer func() {
 		delete(clients, client)
-		leave <- chat.Disconnect{client}
+		leave <- chat.Disconnect{Client: client}
 		client.Conn.Close()
 	}()
 
