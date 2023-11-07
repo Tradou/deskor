@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"log"
 	"os"
 	"os/signal"
 )
@@ -46,12 +47,12 @@ func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
 
 		message, err := client.EncodeMessage(sender, text)
 		if err != nil {
-			fmt.Print("Error while encoding message")
+			log.Printf("Error while encoding message: %s", err)
 			close(exit)
 		} else {
 			err = client.SendMessage(message)
 			if err != nil {
-				fmt.Print("Error while sending message")
+				log.Printf("Error while sending message: %s", err)
 				close(exit)
 			}
 		}
@@ -62,7 +63,7 @@ func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
 		for {
 			message, err := client.ReceiveMessage()
 			if err != nil {
-				fmt.Print("Error while receiving message")
+				log.Printf("Error while receiving message: %s", err)
 				close(exit)
 				break
 			}
@@ -81,7 +82,7 @@ func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
 				}
 				connectedWidget.SetText(fmt.Sprintf("Connected people: %d", receivedMessage.Connected))
 			} else {
-				fmt.Println("Error while reading message", err)
+				log.Println("Error while reading message", err)
 			}
 		}
 	}()

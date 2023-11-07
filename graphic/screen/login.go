@@ -7,11 +7,10 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"log"
 )
 
 func Auth(app fyne.App, w fyne.Window) *fyne.Container {
-	fmt.Print("Auth screen render")
-
 	usernameWidget := widget.NewEntry()
 	usernameWidget.SetPlaceHolder("Username")
 
@@ -22,12 +21,14 @@ func Auth(app fyne.App, w fyne.Window) *fyne.Container {
 		cert, err := tls.LoadX509KeyPair("./cert/client.pem", "./cert/client.key")
 		if err != nil {
 			dialog.NewError(fmt.Errorf("error while loading keys: %v", err), w).Show()
+			log.Print(err)
 			return
 		}
 		config := tls.Config{Certificates: []tls.Certificate{cert}, InsecureSkipVerify: true}
 		conn, err := tls.Dial("tcp", addrWidget.Text, &config)
 		if err != nil {
 			dialog.NewError(fmt.Errorf("error while connecting to server: %v", err), w).Show()
+			log.Print(err)
 			conn.Close()
 			return
 		}

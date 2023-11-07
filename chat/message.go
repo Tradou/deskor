@@ -3,7 +3,6 @@ package chat
 import (
 	"deskor/encrypt"
 	"encoding/json"
-	"fmt"
 )
 
 type Messager interface {
@@ -24,7 +23,7 @@ func (c *Client) EncodeMessage(sender, text string) ([]byte, error) {
 	if ShouldBeEncrypt(message) {
 		cypherText, err := cypher.Encrypt(text)
 		if err != nil {
-			fmt.Print("Error while encrypting message")
+			return nil, err
 		}
 		message.Text = cypherText
 	}
@@ -66,7 +65,7 @@ func (c *Client) DecodeMessage(message string) (Message, error) {
 	if ShouldBeDecrypt(receivedMessage) {
 		receivedMessage.Text, err = cypher.Decrypt(receivedMessage.Text)
 		if err != nil {
-			fmt.Print("Error while decrypting message")
+			return Message{}, err
 		}
 	}
 

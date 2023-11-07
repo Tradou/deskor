@@ -2,13 +2,15 @@ package main
 
 import (
 	"deskor/graphic/screen"
-	"fmt"
+	logger "deskor/log"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"log"
 )
 
 func main() {
-	fmt.Print("Start running client")
+	logger.New()
+	log.Print("Start running client")
 
 	myApp := app.New()
 	window := myApp.NewWindow("Deskor")
