@@ -2,7 +2,6 @@ package screen
 
 import (
 	"crypto/tls"
-	logger "deskor/log"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -11,10 +10,7 @@ import (
 )
 
 func Auth(app fyne.App, w fyne.Window) *fyne.Container {
-	logger.New()
-	clientLog := logger.Get()
-	defer clientLog.Close()
-	clientLog.Write("Auth screen render")
+	fmt.Print("Auth screen render")
 
 	usernameWidget := widget.NewEntry()
 	usernameWidget.SetPlaceHolder("Username")
