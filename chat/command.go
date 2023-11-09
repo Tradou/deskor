@@ -9,6 +9,8 @@ const prefixCommand = "/"
 var fns = map[string]struct {
 	fn          func(message Message) Message
 	description string
+	flags       []string
+	mandatory   []string
 }{
 	"help": {
 		fn:          callHelp,
