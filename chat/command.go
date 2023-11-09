@@ -27,7 +27,8 @@ type Commander interface {
 type Cmd struct{}
 
 func Dispatch(msg Message) Message {
-	if entry, found := fns[msg.Text[len(prefixCommand):]]; found {
+	command := getCommand(msg)
+	if entry, found := fns[command]; found {
 		return entry.fn(msg)
 	}
 	return callUnknown(msg)
