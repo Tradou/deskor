@@ -19,21 +19,25 @@ type Flag struct {
 	Value string
 }
 
-var fns = map[string]Commands{
-	"help": {
+var fns = make(map[string]Commands)
+
+func init() {
+	fns["help"] = Commands{
 		fn:          callHelp,
 		description: "Describe commands",
-	},
-	"ping": {
+	}
+
+	fns["ping"] = Commands{
 		fn:          callPing,
 		description: "Play ping-pong",
-	},
-	"announce": {
+	}
+
+	fns["announce"] = Commands{
 		fn:          callAnnounce,
 		description: "Make an announce",
 		flags:       []string{"text"},
 		mandatory:   []string{"text"},
-	},
+	}
 }
 
 type Commander interface {
