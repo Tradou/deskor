@@ -14,7 +14,7 @@ func main() {
 	logger.New()
 	log.Print("Server has just started")
 
-	server := chat.NewServer()
+	server = chat.NewServer()
 
 	listener, err := connect.Setup()
 	if err != nil {
