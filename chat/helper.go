@@ -22,7 +22,7 @@ func ShouldBeDecrypt(msg Message) bool {
 }
 
 func getCommand(msg Message) string {
-	return msg.Text[len("a"):strings.Index(msg.Text, " ")]
+	return msg.Text[len(prefixCommand):strings.Index(msg.Text, " ")]
 }
 
 func getFlags(msg string, cmd Commands) ([]Flag, error) {
