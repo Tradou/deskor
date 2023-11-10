@@ -16,11 +16,11 @@ type Encrypter interface {
 	readKey(keyPath string) ([]byte, error)
 }
 
-type EncrypterImpl struct {
+type AesEncrypt struct {
 	//KeyPath string
 }
 
-func (encrypt *EncrypterImpl) readKey() ([]byte, error) {
+func (encrypt *AesEncrypt) readKey() ([]byte, error) {
 	key, err := os.ReadFile("./cert/encrypt.key")
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func (encrypt *EncrypterImpl) readKey() ([]byte, error) {
 	return key, nil
 }
 
-func (encrypt *EncrypterImpl) Encrypt(plaintext string) (string, error) {
+func (encrypt *AesEncrypt) Encrypt(plaintext string) (string, error) {
 	key, err := encrypt.readKey()
 	if err != nil {
 		return "", err
@@ -55,7 +55,7 @@ func (encrypt *EncrypterImpl) Encrypt(plaintext string) (string, error) {
 	return ciphertextString, nil
 }
 
-func (encrypt *EncrypterImpl) Decrypt(ciphertext string) (string, error) {
+func (encrypt *AesEncrypt) Decrypt(ciphertext string) (string, error) {
 	key, err := encrypt.readKey()
 	if err != nil {
 		return "", err

@@ -4,6 +4,8 @@ go 1.21
 
 require github.com/joho/godotenv v1.5.1
 
+require gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
+
 require (
 	github.com/gopxl/beep v1.1.0
 	github.com/hajimehoshi/go-mp3 v0.3.0 // indirect

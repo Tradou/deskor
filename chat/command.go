@@ -1,37 +1,70 @@
 package chat
 
 import (
-	"strings"
+	"fmt"
 )
 
-var PrefixCommand = "/"
+const prefixCommand = "/"
+const prefixFlag = "--"
 
-func IsCommand(msg Message) bool {
-	return strings.HasPrefix(msg.Text, PrefixCommand)
+type Commands struct {
+	fn          func(message Message) Message
+	description string
+	flags       []string
+	mandatory   []string
 }
 
-func isAnnouncement(msg Message) bool {
-	return msg.Sender == "SERVER" && msg.SenderIp == ""
+type Flag struct {
+	Key   string
+	Value string
 }
 
-func ShouldBeEncrypt(msg Message) bool {
-	return !(IsCommand(msg) || isAnnouncement(msg))
+var fns = map[string]Commands{
+	"help": {
+		fn:          callHelp,
+		description: "Describe commands",
+	},
+	"ping": {
+		fn:          callPing,
+		description: "Play ping-pong",
+	},
+	"announce": {
+		fn:          callAnnounce,
+		description: "Make an announce",
+		flags:       []string{"text"},
+		mandatory:   []string{"text"},
+	},
 }
 
-func ShouldBeDecrypt(msg Message) bool {
-	return ShouldBeEncrypt(msg)
+type Commander interface {
+	Dispatch(msg Message) Message
 }
+
+type Cmd struct{}
 
 func Dispatch(msg Message) Message {
-	switch msg.Text[1:] {
-	case "ping":
-		return ping(msg)
-	default:
-		return unknown(msg)
+	command := getCommand(msg)
+	if entry, found := fns[command]; found {
+		return entry.fn(msg)
+	}
+	return callUnknown(msg)
+}
+
+func (c *Cmd) help(msg Message) Message {
+	helpMessage := ""
+	for k, v := range fns {
+		helpMessage += fmt.Sprintf("%s: %s\n", k, v.description)
+	}
+
+	return Message{
+		Sender:    "SERVER",
+		SenderIp:  "",
+		Text:      helpMessage,
+		Connected: msg.Connected,
 	}
 }
 
-func ping(msg Message) Message {
+func (c *Cmd) ping(msg Message) Message {
 	return Message{
 		Sender:    "SERVER",
 		SenderIp:  "",
@@ -40,11 +73,51 @@ func ping(msg Message) Message {
 	}
 }
 
-func unknown(msg Message) Message {
+func (c *Cmd) announce(msg Message) Message {
+	flags, err := getFlags(msg.Text, fns["announce"])
+	if err != nil {
+		return Message{
+			Sender:   "SERVER",
+			SenderIp: "",
+			// refactor this, it works only because there's one flag on this command.
+			Text:      fmt.Sprintf("ANNOUNCEMENT: %s", flags[0].Value),
+			Connected: msg.Connected,
+		}
+	}
+
 	return Message{
 		Sender:    "SERVER",
 		SenderIp:  "",
-		Text:      "This command does not exists",
+		Text:      "Pong",
 		Connected: msg.Connected,
 	}
+}
+
+func (c *Cmd) unknown(msg Message) Message {
+	return Message{
+		Sender:    "SERVER",
+		SenderIp:  "",
+		Text:      fmt.Sprintf("This command does not exists, type %shelp for ...help", prefixCommand),
+		Connected: msg.Connected,
+	}
+}
+
+func callHelp(msg Message) Message {
+	ms := Cmd{}
+	return ms.help(msg)
+}
+
+func callPing(msg Message) Message {
+	ms := Cmd{}
+	return ms.ping(msg)
+}
+
+func callAnnounce(msg Message) Message {
+	ms := Cmd{}
+	return ms.announce(msg)
+}
+
+func callUnknown(msg Message) Message {
+	ms := Cmd{}
+	return ms.unknown(msg)
 }

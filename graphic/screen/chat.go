@@ -9,11 +9,16 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"log"
 	"os"
 	"os/signal"
 )
 
 func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
+	client := &chat.Client{
+		Conn: conn,
+	}
+
 	usernameWidget := widget.NewEntry()
 	usernameWidget.SetText(username)
 	usernameWidget.Disable()
@@ -39,16 +44,15 @@ func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
 
 	messageWidget.OnSubmitted = func(text string) {
 		sender := usernameWidget.Text
-		chater := &chat.Client{}
 
-		message, err := chater.EncodeMessage(sender, text)
+		message, err := client.EncodeMessage(sender, text)
 		if err != nil {
-			fmt.Print("Error while encoding message")
+			log.Printf("Error while encoding message: %s", err)
 			close(exit)
 		} else {
-			err = chater.SendMessage(conn, message)
+			err = client.SendMessage(message)
 			if err != nil {
-				fmt.Print("Error while sending message")
+				log.Printf("Error while sending message: %s", err)
 				close(exit)
 			}
 		}
@@ -57,17 +61,15 @@ func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
 
 	go func() {
 		for {
-			chater := &chat.Client{}
-
-			message, err := chater.ReceiveMessage(conn)
+			message, err := client.ReceiveMessage()
 			if err != nil {
-				fmt.Print("Error while receiving message")
+				log.Printf("Error while receiving message: %s", err)
 				close(exit)
 				break
 			}
 
 			var receivedMessage chat.Message
-			decodedMessage, err := chater.DecodeMessage(message)
+			decodedMessage, err := client.DecodeMessage(message)
 
 			if err == nil {
 				receivedMessage = decodedMessage
@@ -80,7 +82,7 @@ func Chat(username string, conn *tls.Conn, app fyne.App) *fyne.Container {
 				}
 				connectedWidget.SetText(fmt.Sprintf("Connected people: %d", receivedMessage.Connected))
 			} else {
-				fmt.Println("Error while reading message", err)
+				log.Println("Error while reading message", err)
 			}
 		}
 	}()

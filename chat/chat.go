@@ -1,97 +1,88 @@
 package chat
 
 import (
-	"deskor/encrypt"
 	"encoding/json"
-	"fmt"
-	"io"
 	"net"
 )
+
+const serverName = "SERVER"
 
 type Message struct {
 	Sender    string `json:"sender"`
 	SenderIp  string `json:"senderIp"`
 	Text      string `json:"text"`
 	Connected int    `json:"int"`
-	IChat
 }
 
 type Client struct {
 	Conn     net.Conn
 	Messages chan Message
+	Messager
+	Commander
 }
 
 type Disconnect struct {
 	Client Client
 }
 
-type IChat interface {
-	DispatchMessage()
-	EncodeMessage(sender, text string) ([]byte, error)
-	SendMessage(conn io.Writer, message []byte) error
-	ReceiveMessage(conn io.Reader) (string, error)
-	DecodeMessage(message string) (Message, error)
+type Server struct {
+	Clients   map[Client]bool
+	Join      chan Client
+	Leave     chan Disconnect
+	Messages  chan Message
+	Connected int
 }
 
-func (c *Client) EncodeMessage(sender, text string) ([]byte, error) {
-	encrypter := encrypt.EncrypterImpl{}
-
-	message := Message{
-		Sender: sender,
-		Text:   text,
+func NewServer() *Server {
+	return &Server{
+		Clients:  make(map[Client]bool),
+		Join:     make(chan Client),
+		Leave:    make(chan Disconnect),
+		Messages: make(chan Message),
 	}
-
-	if ShouldBeEncrypt(message) {
-		cypherText, err := encrypter.Encrypt(text)
-		if err != nil {
-			fmt.Print("Error while encrypting message")
-		}
-		message.Text = cypherText
-	}
-
-	messageJSON, err := json.Marshal(message)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return append(messageJSON, '\n'), nil
 }
 
-func (c *Client) SendMessage(conn io.Writer, message []byte) error {
-	_, err := conn.Write(message)
+func (s *Server) JoinClient(client Client) {
+	s.Join <- client
+}
+
+func (s *Server) LeaveClient(client Client) {
+	s.Leave <- Disconnect{Client: client}
+}
+
+func (s *Server) AddMessage(message Message) {
+	s.Messages <- message
+}
+
+func (s *Server) GetConnectedCount() int {
+	return s.Connected
+}
+
+func (s *Server) IncrementConnectedCount() {
+	s.Connected++
+}
+
+func (s *Server) DecrementConnectedCount() {
+	s.Connected--
+}
+
+func (s *Server) SendWelcomeMessage(client Client) error {
+	welcomeMessage := Message{
+		Sender:    serverName,
+		SenderIp:  "",
+		Text:      "Someone has arrived",
+		Connected: s.GetConnectedCount(),
+	}
+	welcomeMessageJSON, _ := json.Marshal(welcomeMessage)
+	_, err := client.Conn.Write(welcomeMessageJSON)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *Client) ReceiveMessage(conn io.Reader) (string, error) {
-	buffer := make([]byte, 1024)
-	n, err := conn.Read(buffer)
-	if err != nil {
-		return "", err
-	}
-
-	message := string(buffer[:n])
-	return message, nil
-}
-
-func (c *Client) DecodeMessage(message string) (Message, error) {
-	var receivedMessage Message
-	encrypter := encrypt.EncrypterImpl{}
-	var err error
-
-	if err := json.Unmarshal([]byte(message), &receivedMessage); err != nil {
-		return Message{}, err
-	}
-
-	if ShouldBeDecrypt(receivedMessage) {
-		receivedMessage.Text, err = encrypter.Decrypt(receivedMessage.Text)
-		if err != nil {
-			fmt.Print("Error while decrypting message")
-		}
-	}
-
-	return receivedMessage, nil
+func (s *Server) Clean(client Client) {
+	delete(s.Clients, client)
+	s.LeaveClient(client)
+	client.Conn.Close()
 }
