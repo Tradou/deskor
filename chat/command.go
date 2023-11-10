@@ -5,13 +5,21 @@ import (
 )
 
 const prefixCommand = "/"
+const prefixFlag = "--"
 
-var fns = map[string]struct {
+type Commands struct {
 	fn          func(message Message) Message
 	description string
 	flags       []string
 	mandatory   []string
-}{
+}
+
+type Flag struct {
+	Key   string
+	Value string
+}
+
+var fns = map[string]Commands{
 	"help": {
 		fn:          callHelp,
 		description: "Describe commands",
@@ -19,6 +27,12 @@ var fns = map[string]struct {
 	"ping": {
 		fn:          callPing,
 		description: "Play ping-pong",
+	},
+	"announce": {
+		fn:          callAnnounce,
+		description: "Make an announce",
+		flags:       []string{"text"},
+		mandatory:   []string{"text"},
 	},
 }
 
@@ -59,6 +73,26 @@ func (c *Cmd) ping(msg Message) Message {
 	}
 }
 
+func (c *Cmd) announce(msg Message) Message {
+	flags, err := getFlags(msg.Text, fns["announce"])
+	if err != nil {
+		return Message{
+			Sender:   "SERVER",
+			SenderIp: "",
+			// refactor this, it works only because there's one flag on this command.
+			Text:      fmt.Sprintf("ANNOUNCEMENT: %s", flags[0].Value),
+			Connected: msg.Connected,
+		}
+	}
+
+	return Message{
+		Sender:    "SERVER",
+		SenderIp:  "",
+		Text:      "Pong",
+		Connected: msg.Connected,
+	}
+}
+
 func (c *Cmd) unknown(msg Message) Message {
 	return Message{
 		Sender:    "SERVER",
@@ -76,6 +110,11 @@ func callHelp(msg Message) Message {
 func callPing(msg Message) Message {
 	ms := Cmd{}
 	return ms.ping(msg)
+}
+
+func callAnnounce(msg Message) Message {
+	ms := Cmd{}
+	return ms.announce(msg)
 }
 
 func callUnknown(msg Message) Message {

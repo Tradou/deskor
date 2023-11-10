@@ -1,7 +1,7 @@
 package chat
 
 import (
-	"regexp"
+	"fmt"
 	"strings"
 )
 
@@ -25,17 +25,37 @@ func getCommand(msg Message) string {
 	return msg.Text[len("a"):strings.Index(msg.Text, " ")]
 }
 
-func getFlags(msg Message) []string {
-	r := regexp.MustCompile(`--"([^"]*)"|--([^ ]*)`)
-	matches := r.FindAllStringSubmatch(msg.Text, -1)
+func getFlags(msg string, cmd Commands) ([]Flag, error) {
+	var flags []Flag
 
-	var flags []string
-	for _, match := range matches {
-		if match[1] != "" {
-			flags = append(flags, match[1])
-		} else {
-			flags = append(flags, match[2])
+	args := strings.Fields(msg)
+
+	for i := 1; i < len(args); i++ {
+		arg := args[i]
+
+		if len(arg) > 2 && arg[0:2] == prefixFlag {
+			var key, value string
+
+			if strings.Contains(arg, "=") {
+				parts := strings.SplitN(arg[2:], "=", 2)
+				key = parts[0]
+				value = parts[1]
+			} else {
+				key = arg[2:]
+				if i+1 < len(args) && !strings.HasPrefix(args[i+1], prefixFlag) {
+					value = args[i+1]
+					i++
+				}
+			}
+			for _, s := range cmd.flags {
+				if s == key {
+					flags = append(flags, Flag{Key: key, Value: value})
+				} else {
+					return nil, fmt.Errorf("flag not exists")
+				}
+			}
 		}
 	}
-	return flags
+
+	return flags, nil
 }
