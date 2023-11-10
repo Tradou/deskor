@@ -7,7 +7,7 @@ import (
 
 func New() {
 	log.SetOutput(&lumberjack.Logger{
-		Filename:   "app.log",
+		Filename:   "logs/app.log",
 		Compress:   true,
 		MaxBackups: 10,
 		MaxAge:     1,
