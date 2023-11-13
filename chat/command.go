@@ -7,6 +7,8 @@ import (
 const prefixCommand = "/"
 const prefixFlag = "--"
 
+var m *Cmd
+
 type Commands struct {
 	fn          func(message Message) Message
 	description string
@@ -107,21 +109,17 @@ func (c *Cmd) unknown(msg Message) Message {
 }
 
 func callHelp(msg Message) Message {
-	ms := Cmd{}
-	return ms.help(msg)
+	return m.help(msg)
 }
 
 func callPing(msg Message) Message {
-	ms := Cmd{}
-	return ms.ping(msg)
+	return m.ping(msg)
 }
 
 func callAnnounce(msg Message) Message {
-	ms := Cmd{}
-	return ms.announce(msg)
+	return m.announce(msg)
 }
 
 func callUnknown(msg Message) Message {
-	ms := Cmd{}
-	return ms.unknown(msg)
+	return m.unknown(msg)
 }
