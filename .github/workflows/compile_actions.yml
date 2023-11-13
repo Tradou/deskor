@@ -25,16 +25,14 @@ jobs:
           git config --global user.name ${{ secrets.GIT_USER }}
           git checkout -f -b server-wip
           go build -o bin/server server.go
-          if ! git diff --quiet -- bin/server; then
-            git ls-files | xargs git rm --cached
-            mv bin/server server
-            mv .env.server.sample .env.server
-            mv build/server/README.md README.md
-            git add -f server .env.server README.md
-            git commit -m "build(compile): compile for server"
-            git push origin -d server
-            git push origin server-wip:server
-          fi
+          git ls-files | xargs git rm --cached
+          mv bin/server server
+          mv .env.server.sample .env.server
+          mv build/server/README.md README.md
+          git add -f server .env.server README.md
+          git commit -m "build(compile): compile for server"
+          git push origin -d server
+          git push origin server-wip:server
 
   compile-windows:
     name: Compile windows
@@ -62,15 +60,13 @@ jobs:
           go mod tidy
           rm server.go 2>/dev/null
           fyne-cross windows -image fyne-custom
-          if ! git diff --quiet -- /bin/windows-amd64/; then
-            git ls-files | xargs git rm --cached
-            mv fyne-cross/bin/windows-amd64/Deskor.exe Deskor.exe
-            mv build/client/README.md README.md
-            git add -f Deskor.exe README.md
-            git commit -m "build(compile): compile for Windows"
-            git push origin -d windows
-            git push origin windows-wip:windows
-          fi
+          git ls-files | xargs git rm --cached
+          mv fyne-cross/bin/windows-amd64/Deskor.exe Deskor.exe
+          mv build/client/README.md README.md
+          git add -f Deskor.exe README.md
+          git commit -m "build(compile): compile for Windows"
+          git push origin -d windows
+          git push origin windows-wip:windows
 
   compile-linux:
     name: Compile linux
@@ -98,12 +94,10 @@ jobs:
           go mod tidy
           rm server.go 2>/dev/null
           fyne-cross linux -image fyne-custom
-          if ! git diff --quiet -- /bin/linux-amd64/; then
-            git ls-files | xargs git rm --cached
-            mv fyne-cross/bin/linux-amd64/deskor deskor
-            mv build/client/README.md README.md
-            git add -f deskor README.md
-            git commit -m "build(compile): compile for Linux"
-            git push origin -d linux
-            git push origin linux-wip:linux
-          fi
+          git ls-files | xargs git rm --cached
+          mv fyne-cross/bin/linux-amd64/deskor deskor
+          mv build/client/README.md README.md
+          git add -f deskor README.md
+          git commit -m "build(compile): compile for Linux"
+          git push origin -d linux
+          git push origin linux-wip:linux
