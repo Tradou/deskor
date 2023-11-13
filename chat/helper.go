@@ -2,6 +2,7 @@ package chat
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -22,40 +23,52 @@ func ShouldBeDecrypt(msg Message) bool {
 }
 
 func getCommand(msg Message) string {
-	return msg.Text[len(prefixCommand):strings.Index(msg.Text, " ")]
+	flagIndex := strings.Index(msg.Text, " ")
+	if flagIndex == -1 {
+		return msg.Text[len(prefixCommand):]
+	}
+
+	return msg.Text[len(prefixCommand):flagIndex]
 }
 
-func getFlags(msg string, cmd Commands) ([]Flag, error) {
+func parseFlags(entryFlags string, cmdFlags []string) []Flag {
 	var flags []Flag
 
-	args := strings.Fields(msg)
+	r := regexp.MustCompile(fmt.Sprintf(`%s(\w+)(?:=("[^"]*"|\S+))?`, regexp.QuoteMeta(prefixFlag)))
+	matches := r.FindAllStringSubmatch(entryFlags, -1)
 
-	for i := 1; i < len(args); i++ {
-		arg := args[i]
+	for _, match := range matches {
+		key := match[1]
+		var value string
 
-		if len(arg) > 2 && arg[0:2] == prefixFlag {
-			var key, value string
+		if len(match) > 2 {
+			value = strings.Trim(match[2], `"`)
+		}
 
-			if strings.Contains(arg, "=") {
-				parts := strings.SplitN(arg[2:], "=", 2)
-				key = parts[0]
-				value = parts[1]
-			} else {
-				key = arg[2:]
-				if i+1 < len(args) && !strings.HasPrefix(args[i+1], prefixFlag) {
-					value = args[i+1]
-					i++
-				}
-			}
-			for _, s := range cmd.flags {
-				if s == key {
-					flags = append(flags, Flag{Key: key, Value: value})
-				} else {
-					return nil, fmt.Errorf("flag not exists")
-				}
+		for _, cmdFlag := range cmdFlags {
+			if cmdFlag == key {
+				flags = append(flags, Flag{Key: key, Value: value})
 			}
 		}
 	}
 
-	return flags, nil
+	return flags
+}
+
+func ValidateMandatory(entryFlags []Flag, cmdFlags []string) bool {
+	if len(cmdFlags) > len(entryFlags) {
+		return false
+	}
+	cmdFlagsMap := make(map[string]struct{})
+	for _, m := range cmdFlags {
+		cmdFlagsMap[m] = struct{}{}
+	}
+
+	for _, flag := range entryFlags {
+		if _, found := cmdFlagsMap[flag.Key]; !found {
+			return false
+		}
+	}
+
+	return true
 }
