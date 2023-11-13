@@ -1,40 +1,35 @@
 # Installation
 
-## Client
-- [Windows](https://github.com/Tradou/deskor/blob/windows/README.md)
-- [Linux](https://github.com/Tradou/deskor/blob/linux/README.md)
-
-## Server
-[See here](https://github.com/Tradou/deskor/blob/server/README.md)
-
-## Setup development environment (notes)
-### Prerequisites
-
-- Docker is required to build client platform from a custom linux image
-- Go is required to build server side
-
-### Build custom docker image
 ```shell
-docker build -t fyne-custom -f build/Dockerfile .
+git checkout server
+git pull
 ```
 
-### Build client platform
-```shell
-# Need to delete server.go in order to build client platform
-rm server.go
+# Configuration
 
-# Platform should be the target platform (eg: linux)
-fyne-cross PLATFORM -image fyne-custom
+In order to configure the server, several steps are required.
+```shell
+#Generate certification authority
+openssl genpkey -algorithm RSA -out ./cert/ca.key
+openssl req -new -x509 -key ./cert/ca.key -out ./cert/ca.crt
+
+# Generate server certificate
+openssl genpkey -algorithm RSA -out ./cert/server.key
+openssl req -new -key ./cert/server.key -out ./cert/server.csr
+openssl x509 -req -in ./cert/server.csr -CA ./cert/ca.crt -CAkey ./cert/ca.key -CAcreateserial -out ./cert/server.crt
+
+# Generate client certificate
+openssl genpkey -algorithm RSA -out ./cert/client.key
+openssl req -new -key ./cert/client.key -out ./cert/client.csr
+openssl x509 -req -in ./cert/client.csr -CA ./cert/ca.crt -CAkey ./cert/ca.key -CAcreateserial -out ./cert/client.crt
+openssl x509 -in ./cert/client.crt -outform PEM -out ./cert/client.pem
+
+# Generate the encryption key
+openssl rand -out ./cert/encrypt.key 32
 ```
 
-### Build server
-```shell
-go build -o bin/server server.go
-```
+# Run
 
-### Build assets
-Each assets need to be bundle to be used in the **client** version. 
 ```shell
-fyne bundle -o ./assets/bundle/MY_ASSET.go ./assets/MY_FOLDER/MY_ASSET
+./server
 ```
-Make sure to edit the bundle assets to make it exportable
