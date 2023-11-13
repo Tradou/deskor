@@ -80,21 +80,22 @@ func (c *Cmd) ping(msg Message) Message {
 }
 
 func (c *Cmd) announce(msg Message) Message {
-	flags, err := getFlags(msg.Text, fns["announce"])
-	if err != nil {
+	flags := parseFlags(msg.Text, fns["announce"].flags)
+
+	if !ValidateMandatory(flags, fns["announce"].mandatory) {
 		return Message{
-			Sender:   "SERVER",
-			SenderIp: "",
-			// refactor this, it works only because there's one flag on this command.
-			Text:      fmt.Sprintf("ANNOUNCEMENT: %s", flags[0].Value),
+			Sender:    "SERVER",
+			SenderIp:  "",
+			Text:      fmt.Sprintf("Announcement command have to be called with %v", fns["announce"].mandatory),
 			Connected: msg.Connected,
 		}
 	}
 
 	return Message{
-		Sender:    "SERVER",
-		SenderIp:  "",
-		Text:      "Pong",
+		Sender:   "SERVER",
+		SenderIp: "",
+		// refactor this, it works only because there's one flag on this command.
+		Text:      fmt.Sprintf("ANNOUNCEMENT: %s", flags[0].Value),
 		Connected: msg.Connected,
 	}
 }
